@@ -14,6 +14,8 @@
 
 extern crate phosphorus;
 
+static HELLO_MARKUP: &'static str = include_str!("hello-markup.phml");
+
 fn main() {
     phosphorus::say_hello();
 }

@@ -18,6 +18,9 @@ version = "0.0.1"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
+[dependencies.jade]
+path = "../jade"
+
 [dependencies.gfx]
 git = "http://github.com/gfx-rs/gfx-rs"
 
