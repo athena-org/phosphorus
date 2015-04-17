@@ -12,6 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[test]
-fn it_works() {
+#![feature(plugin, custom_attribute)]
+#![plugin(gfx_macros)]
+
+extern crate gfx;
+extern crate gfx_window_glutin;
+extern crate glutin;
+
+use gfx::traits::*;
+
+pub fn say_hello() {
+    let window = glutin::WindowBuilder::new()
+        .with_vsync()
+        .with_dimensions(1280, 720)
+        .build_strict().unwrap();
+    let mut canvas = gfx_window_glutin::init(window)
+        .into_canvas();
+    canvas.output.window.set_title("Hello");
+
+    'main: loop {
+        // quit when Esc is pressed.
+        for event in canvas.output.window.poll_events() {
+            match event {
+                glutin::Event::KeyboardInput(_, _, Some(glutin::VirtualKeyCode::Escape)) => break 'main,
+                glutin::Event::Closed => break 'main,
+                _ => {},
+            }
+        }
+
+        canvas.clear(gfx::ClearData {
+            color: [0.3, 0.3, 0.3, 1.0],
+            depth: 1.0,
+            stencil: 0,
+        });
+        canvas.present();
+    }
 }

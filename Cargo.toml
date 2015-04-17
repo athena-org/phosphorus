@@ -17,3 +17,16 @@ name = "phosphorus"
 version = "0.0.1"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
+
+[dependencies.gfx]
+git = "http://github.com/gfx-rs/gfx-rs"
+
+[dependencies.gfx_macros]
+git = "https://github.com/gfx-rs/gfx_macros"
+plugin = true
+
+[dependencies.gfx_window_glutin]
+git = "https://github.com/gfx-rs/gfx_window_glutin"
+
+[dependencies.glutin]
+git = "https://github.com/tomaka/glutin"
