@@ -13,9 +13,34 @@
 // limitations under the License.
 
 extern crate phosphorus;
+extern crate glutin;
+extern crate gfx;
+extern crate gfx_window_glutin;
+
+use gfx::traits::*;
 
 static HELLO_MARKUP: &'static str = include_str!("hello-markup.jade");
 
 fn main() {
-    phosphorus::say_hello();
+    let window = glutin::WindowBuilder::new()
+        .with_vsync()
+        .with_dimensions(1280, 720)
+        .build_strict().unwrap();
+    let mut canvas = gfx_window_glutin::init(window).into_canvas();
+    canvas.output.window.set_title("Hello");
+
+    'main: loop {
+        // quit when Esc is pressed.
+        for event in canvas.output.window.poll_events() {
+            match event {
+                glutin::Event::KeyboardInput(_, _, Some(glutin::VirtualKeyCode::Escape)) => break 'main,
+                glutin::Event::Closed => break 'main,
+                _ => {},
+            }
+        }
+
+        phosphorus::say_hello(&canvas.output, &mut canvas.renderer);
+
+        canvas.present();
+    }
 }
