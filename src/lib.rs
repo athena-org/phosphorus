@@ -16,7 +16,7 @@ extern crate gfx;
 
 use gfx::traits::*;
 
-pub mod layout;
+pub mod widgets;
 
 static VERTEX_SRC: &'static [u8] = b"
     #version 120
@@ -46,15 +46,15 @@ struct Shaders<R: gfx::Resources> {
 }
 
 pub struct Gui<R: gfx::Resources> {
-    root: layout::GuiLayout,
+    root: widgets::LayoutWidget,
     shaders: Shaders<R>
 }
 
 impl<R: gfx::Resources> Gui<R> {
-    pub fn root(&self) -> &layout::GuiLayout { &self.root }
-    pub fn root_mut(&mut self) -> &mut layout::GuiLayout { &mut self.root }
+    pub fn root(&self) -> &widgets::LayoutWidget { &self.root }
+    pub fn root_mut(&mut self) -> &mut widgets::LayoutWidget { &mut self.root }
 
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> Gui<R> {
+    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widgets::LayoutWidget) -> Gui<R> {
         let solid_color_program = match factory.link_program(VERTEX_SRC, FRAGMENT_SRC) {
             Ok(v) => v,
             Err(e) => panic!(format!("{:?}", e))
@@ -65,7 +65,7 @@ impl<R: gfx::Resources> Gui<R> {
         };
 
         Gui {
-            root: layout::GuiLayout::new(),
+            root: root,
             shaders: shaders
         }
     }
@@ -73,15 +73,16 @@ impl<R: gfx::Resources> Gui<R> {
     pub fn render<
         O: gfx::Output<R>,
         C: gfx::CommandBuffer<R>
-    >(  &self,
+    >(
+        &self,
         output: &O,
         renderer: &mut gfx::Renderer<R, C>)
     {
         let (x, y) = output.get_size();
-        let offset = layout::LayoutOffset {
+        let area = widgets::LayoutArea {
             position: [0, 0],
             size: [x, y]
         };
-        self.root.render(output, renderer, &offset);
+        self.root.render(output, renderer, &area);
     }
 }

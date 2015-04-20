@@ -31,14 +31,13 @@ fn main() {
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
 
     // Set up our phosphorus gui
-    let mut gui = phosphorus::Gui::new(&mut canvas.factory);
-    {
-        let mut root = gui.root_mut();
-        root.set_background(phosphorus::layout::BackgroundType::Color([0.9, 0.3, 0.3]));
-    }
+    let mut root = phosphorus::widgets::LayoutWidgetBuilder::new()
+        .with_background_color([0.9, 0.3, 0.3])
+        .build();
+    let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 
     'main: loop {
-        // quit when Esc is pressed.
+        // Quit when the window is closed
         for event in canvas.output.window.poll_events() {
             match event {
                 glutin::Event::Closed => break 'main,
@@ -53,8 +52,10 @@ fn main() {
             stencil: 0,
         });
 
+        // Render our actual GUI
         gui.render(&canvas.output, &mut canvas.renderer);
 
+        // Show the rendered to buffer on the screen
         canvas.present();
     }
 }
