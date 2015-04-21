@@ -65,9 +65,10 @@ impl LayoutWidget {
         &self,
         output: &O,
         renderer: &mut gfx::Renderer<R, C>,
+        render_helper: &mut ::RenderHelper<R>,
         prev_area: &LayoutArea)
     {
-        self.render_background(output, renderer, prev_area);
+        self.render_background(output, renderer, render_helper, prev_area);
     }
 
     fn render_background<
@@ -78,12 +79,14 @@ impl LayoutWidget {
         &self,
         output: &O,
         renderer: &mut gfx::Renderer<R, C>,
+        render_helper: &mut ::RenderHelper<R>,
         area: &LayoutArea)
     {
-        // TODO: Implement me
         match self.background {
             LayoutBackground::None => {},
-            LayoutBackground::Color(c) => {}
+            LayoutBackground::Color(c) => {
+                render_helper.draw_square();
+            }
         }
     }
 }

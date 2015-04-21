@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![feature(plugin, custom_attribute)]
+#![plugin(gfx_macros)]
+
 extern crate gfx;
 
 use gfx::traits::*;
@@ -41,13 +44,38 @@ static FRAGMENT_SRC: &'static [u8] = b"
     }
 ";
 
-struct Shaders<R: gfx::Resources> {
-    solid_color_program: gfx::device::handle::Program<R>
+#[vertex_format]
+#[derive(Clone, Copy)]
+struct Vertex {
+    #[name = "a_Pos"]
+    pos: [f32; 2],
+
+    #[name = "a_Color"]
+    color: [f32; 3],
+}
+
+pub struct RenderHelper<R: gfx::Resources> {
+    solid_color_program: gfx::device::handle::Program<R>,
+    draw_state: gfx::DrawState
+}
+
+impl<R: gfx::Resources> RenderHelper<R> {
+    pub fn draw_square(&mut self) {
+        let vertex_data = [
+            Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
+            Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
+            Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] },
+        ];
+        let test_mesh = canvas.factory.create_mesh(&vertex_data);
+        let slice = test_mesh.to_slice(gfx::PrimitiveType::TriangleList);
+
+        let batch = gfx::batch::bind(&self.draw_state, &test_mesh, slice.clone(), &self.solid_color_program, &None);
+    }
 }
 
 pub struct Gui<R: gfx::Resources> {
     root: widgets::LayoutWidget,
-    shaders: Shaders<R>
+    render_helper: RenderHelper<R>
 }
 
 impl<R: gfx::Resources> Gui<R> {
@@ -60,13 +88,15 @@ impl<R: gfx::Resources> Gui<R> {
             Err(e) => panic!(format!("{:?}", e))
         };
 
-        let shaders = Shaders {
-            solid_color_program: solid_color_program
+        let state = gfx::DrawState::new();
+        let render_helper = RenderHelper {
+            solid_color_program: solid_color_program,
+            draw_state: state
         };
 
         Gui {
             root: root,
-            shaders: shaders
+            render_helper: render_helper
         }
     }
 
@@ -74,7 +104,7 @@ impl<R: gfx::Resources> Gui<R> {
         O: gfx::Output<R>,
         C: gfx::CommandBuffer<R>
     >(
-        &self,
+        &mut self,
         output: &O,
         renderer: &mut gfx::Renderer<R, C>)
     {
@@ -83,6 +113,6 @@ impl<R: gfx::Resources> Gui<R> {
             position: [0, 0],
             size: [x, y]
         };
-        self.root.render(output, renderer, &area);
+        self.root.render(output, renderer, &mut self.render_helper, &area);
     }
 }

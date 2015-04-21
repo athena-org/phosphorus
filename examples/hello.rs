@@ -31,7 +31,7 @@ fn main() {
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
 
     // Set up our phosphorus gui
-    let mut root = phosphorus::widgets::LayoutWidgetBuilder::new()
+    let root = phosphorus::widgets::LayoutWidgetBuilder::new()
         .with_background_color([0.9, 0.3, 0.3])
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
