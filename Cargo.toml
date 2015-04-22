@@ -18,15 +18,22 @@ version = "0.0.1"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
+[dependencies.jade]
+git = "https://github.com/athena-org/jade-rs"
+branch = "develop"
+
 [dependencies.gfx]
-git = "http://github.com/gfx-rs/gfx-rs"
+git = "https://github.com/gfx-rs/gfx-rs"
 
 [dependencies.gfx_macros]
 git = "https://github.com/gfx-rs/gfx_macros"
 plugin = true
 
-[dependencies.gfx_window_glutin]
-git = "https://github.com/gfx-rs/gfx_window_glutin"
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath-rs"
 
-[dependencies.glutin]
+[dev-dependencies.glutin]
 git = "https://github.com/tomaka/glutin"
+
+[dev-dependencies.gfx_window_glutin]
+git = "https://github.com/gfx-rs/gfx_window_glutin"

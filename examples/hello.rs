@@ -13,7 +13,49 @@
 // limitations under the License.
 
 extern crate phosphorus;
+extern crate glutin;
+extern crate gfx;
+extern crate gfx_window_glutin;
+
+use gfx::traits::*;
+
+static HELLO_MARKUP: &'static str = include_str!("hello-markup.jade");
 
 fn main() {
-    phosphorus::say_hello();
+    // Set up our window
+    let window = glutin::WindowBuilder::new()
+        .with_vsync()
+        .with_dimensions(1280, 720)
+        .with_title(String::from("Hello"))
+        .build_strict().unwrap();
+    let mut canvas = gfx_window_glutin::init(window).into_canvas();
+
+    // Set up our phosphorus gui
+    let root = phosphorus::widgets::LayoutWidgetBuilder::new()
+        .with_background_color([0.9, 0.3, 0.3])
+        .build();
+    let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
+
+    'main: loop {
+        // Quit when the window is closed
+        for event in canvas.output.window.poll_events() {
+            match event {
+                glutin::Event::Closed => break 'main,
+                _ => (),
+            }
+        }
+
+        // Clear in so we don't have lingering stuff from the last frame
+        canvas.clear(gfx::ClearData {
+            color: [0.3, 0.3, 0.9, 1.0],
+            depth: 1.0,
+            stencil: 0,
+        });
+
+        // Render our actual GUI
+        gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
+
+        // Show the rendered to buffer on the screen
+        canvas.present();
+    }
 }
