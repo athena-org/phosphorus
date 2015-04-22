@@ -67,6 +67,7 @@ pub struct RenderHelper<R: gfx::Resources> {
 
 impl<R: gfx::Resources> RenderHelper<R> {
     pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderHelper<R> {
+        // Set up the stuff we'll need to render
         let solid_color_program = match factory.link_program(VERTEX_SRC, FRAGMENT_SRC) {
             Ok(v) => v,
             Err(e) => panic!(format!("{:?}", e))
@@ -90,12 +91,14 @@ impl<R: gfx::Resources> RenderHelper<R> {
         factory: &mut F,
         data: RenderData)
     {
+        // Prepare the uniforms to be used for rendering
         let proj = cgmath::ortho::<f32>(0.0, 1280.0, 720.0, 0.0, 1.0, -1.0);
         let params = Params::<R> {
             transform: proj.into_fixed(),
             _dummy: ::std::marker::PhantomData
         };
 
+        // Render all rectangles
         let rects_mesh = RenderHelper::<R>::create_rects_mesh(factory, data.rectangles);
         self.render_rects_mesh(output, renderer, &params, rects_mesh);
     }

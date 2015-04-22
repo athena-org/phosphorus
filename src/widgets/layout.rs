@@ -68,6 +68,7 @@ impl LayoutWidget {
         area: &LayoutArea)
     {
         match self.background {
+            // Different background types render differently
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
                 data.push_rectangle(area.position, area.size, c);
