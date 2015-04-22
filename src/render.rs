@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std;
 use gfx;
 use gfx::traits::*;
 use cgmath;
@@ -57,7 +58,7 @@ struct Params<R: gfx::Resources> {
     #[name = "u_Transform"]
     transform: [[f32; 4]; 4],
 
-    _dummy: ::std::marker::PhantomData<R>
+    _dummy: std::marker::PhantomData<R>
 }
 
 pub struct RenderHelper<R: gfx::Resources> {
@@ -95,7 +96,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
         let proj = cgmath::ortho::<f32>(0.0, 1280.0, 720.0, 0.0, 1.0, -1.0);
         let params = Params::<R> {
             transform: proj.into_fixed(),
-            _dummy: ::std::marker::PhantomData
+            _dummy: std::marker::PhantomData
         };
 
         // Render all rectangles

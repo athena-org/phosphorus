@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use render;
+
 pub struct LayoutArea {
     pub position: [u16;2],
     pub size: [u16;2]
@@ -56,7 +58,7 @@ impl LayoutWidget {
 
     pub fn render(
         &self,
-        data: &mut ::render::RenderData,
+        data: &mut render::RenderData,
         prev_area: &LayoutArea)
     {
         self.render_background(data, prev_area);
@@ -64,7 +66,7 @@ impl LayoutWidget {
 
     fn render_background(
         &self,
-        data: &mut ::render::RenderData,
+        data: &mut render::RenderData,
         area: &LayoutArea)
     {
         match self.background {

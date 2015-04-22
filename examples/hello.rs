@@ -41,7 +41,7 @@ fn main() {
         for event in canvas.output.window.poll_events() {
             match event {
                 glutin::Event::Closed => break 'main,
-                _ => {},
+                _ => (),
             }
         }
 
