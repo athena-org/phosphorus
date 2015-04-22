@@ -20,7 +20,7 @@ use cgmath::FixedArray;
 static VERTEX_SRC: &'static [u8] = b"
     #version 120
 
-    attribute vec2 a_Pos;
+    attribute ivec2 a_Pos;
     attribute vec3 a_Color;
     varying vec4 v_Color;
 
@@ -46,7 +46,7 @@ static FRAGMENT_SRC: &'static [u8] = b"
 #[derive(Clone, Copy)]
 struct Vertex {
     #[name = "a_Pos"]
-    pos: [f32; 2],
+    pos: [u16; 2],
 
     #[name = "a_Color"]
     color: [f32; 3],
@@ -134,8 +134,8 @@ pub struct RenderData {
 }
 
 pub struct RectangleData {
-    start: [f32;2],
-    end: [f32;2],
+    start: [u16;2],
+    end: [u16;2],
     color: [f32;3]
 }
 
@@ -146,10 +146,10 @@ impl RenderData {
         }
     }
 
-    pub fn push_rectangle(&mut self, color: [f32;3]) {
+    pub fn push_rectangle(&mut self, position: [u16;2], size: [u16;2], color: [f32;3]) {
         let data = RectangleData {
-            start: [0.0, 0.0],
-            end: [50.0, 50.0],
+            start: [position[0], position[1]],
+            end: [position[0] + size[0], position[1] + size[1]],
             color: color
         };
 

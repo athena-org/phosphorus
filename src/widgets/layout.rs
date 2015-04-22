@@ -70,7 +70,7 @@ impl LayoutWidget {
         match self.background {
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                data.push_rectangle(c);
+                data.push_rectangle(area.position, area.size, c);
             }
         }
     }
