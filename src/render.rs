@@ -93,7 +93,8 @@ impl<R: gfx::Resources> RenderHelper<R> {
         data: RenderData)
     {
         // Prepare the uniforms to be used for rendering
-        let proj = cgmath::ortho::<f32>(0.0, 1280.0, 720.0, 0.0, 1.0, -1.0);
+        let (x, y) = output.get_size();
+        let proj = cgmath::ortho::<f32>(0.0, x as f32, y as f32, 0.0, 1.0, -1.0);
         let params = Params::<R> {
             transform: proj.into_fixed(),
             _dummy: std::marker::PhantomData
