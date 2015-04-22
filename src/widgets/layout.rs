@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use gfx;
-use gfx::traits::*;
-
 pub struct LayoutArea {
     pub position: [u16;2],
     pub size: [u16;2]
@@ -41,7 +38,7 @@ impl LayoutWidgetBuilder {
         self
     }
 
-    pub fn build(mut self) -> LayoutWidget {
+    pub fn build(self) -> LayoutWidget {
         LayoutWidget {
             background: self.background
         }
@@ -57,39 +54,23 @@ impl LayoutWidget {
         self.background = background;
     }
 
-    pub fn render<
-        R: gfx::Resources,
-        O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>,
-        F: gfx::Factory<R>
-    >(
+    pub fn render(
         &self,
-        output: &mut O,
-        renderer: &mut gfx::Renderer<R, C>,
-        render_helper: &mut ::RenderHelper<R>,
-        factory: &mut F,
+        data: &mut ::RenderData,
         prev_area: &LayoutArea)
     {
-        self.render_background(output, renderer, render_helper, factory, prev_area);
+        self.render_background(data, prev_area);
     }
 
-    fn render_background<
-        R: gfx::Resources,
-        O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>,
-        F: gfx::Factory<R>
-    >(
+    fn render_background(
         &self,
-        output: &mut O,
-        renderer: &mut gfx::Renderer<R, C>,
-        render_helper: &mut ::RenderHelper<R>,
-        factory: &mut F,
+        data: &mut ::RenderData,
         area: &LayoutArea)
     {
         match self.background {
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                render_helper.draw_square(output, renderer, factory);
+                data.push_rectangle(c);
             }
         }
     }

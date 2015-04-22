@@ -54,25 +54,82 @@ struct Vertex {
     color: [f32; 3],
 }
 
-pub struct RenderHelper<R: gfx::Resources> {
+struct RenderHelper<R: gfx::Resources> {
     solid_color_program: gfx::device::handle::Program<R>,
     draw_state: gfx::DrawState
 }
 
 impl<R: gfx::Resources> RenderHelper<R> {
-    pub fn draw_square<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(&mut self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F)
+    pub fn render<
+        O: gfx::Output<R>,
+        C: gfx::CommandBuffer<R>,
+        F: gfx::Factory<R>
+    >(
+        &mut self,
+        output: &mut O,
+        renderer: &mut gfx::Renderer<R, C>,
+        factory: &mut F,
+        data: RenderData)
     {
-        let vertex_data = [
-            Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
-            Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
-            Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] },
-        ];
-        let test_mesh = factory.create_mesh(&vertex_data);
-        let slice = test_mesh.to_slice(gfx::PrimitiveType::TriangleList);
+        let rects_mesh = RenderHelper::<R>::create_rects_mesh(factory, data.rectangles);
+        self.render_rects_mesh(output, renderer, rects_mesh);
+    }
+
+    fn create_rects_mesh<F: gfx::Factory<R>>(factory: &mut F, rects: Vec<RectangleData>) -> gfx::Mesh<R> {
+        let mut vertices = Vec::<Vertex>::new();
+
+        for rect in rects {
+            // Add our rectangle's vertices
+            vertices.push(Vertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+
+            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.end[0], rect.end[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+        }
+
+        // Turn the vertices into a mesh
+        factory.create_mesh(&vertices)
+    }
+
+    fn render_rects_mesh<O: gfx::Output<R>, C: gfx::CommandBuffer<R>>(
+        &self,
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>,
+        mesh: gfx::Mesh<R>)
+    {
+        let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
         let data = None;
-        let batch = gfx::batch::bind(&self.draw_state, &test_mesh, slice.clone(), &self.solid_color_program, &data);
-        renderer.draw(&batch, output);
+        let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.solid_color_program, &data);
+        renderer.draw(&batch, output).unwrap();
+    }
+}
+
+pub struct RenderData {
+    rectangles: Vec<RectangleData>
+}
+
+pub struct RectangleData {
+    start: [f32;2],
+    end: [f32;2],
+    color: [f32;3]
+}
+
+impl RenderData {
+    fn new() -> RenderData {
+        RenderData {
+            rectangles: Vec::<RectangleData>::new()
+        }
+    }
+
+    fn push_rectangle(&mut self, color: [f32;3]) {
+        let data = RectangleData {
+            start: [-0.5, -0.5],
+            end: [0.5, 0.5],
+            color: color
+        };
+
+        self.rectangles.push(data);
     }
 }
 
@@ -113,11 +170,20 @@ impl<R: gfx::Resources> Gui<R> {
         renderer: &mut gfx::Renderer<R, C>,
         factory: &mut F)
     {
+        // Create our render data struct
+        let mut data = RenderData::new();
+
+        // Set up a layout area to the whole screen
         let (x, y) = output.get_size();
         let area = widgets::LayoutArea {
             position: [0, 0],
             size: [x, y]
         };
-        self.root.render(output, renderer, &mut self.render_helper, factory, &area);
+
+        // Actually tell the root layout to render to the data
+        self.root.render(&mut data, &area);
+
+        // Finally, render the data we've gathered
+        self.render_helper.render(output, renderer, factory, data);
     }
 }
