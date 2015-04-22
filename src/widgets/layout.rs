@@ -56,7 +56,7 @@ impl LayoutWidget {
 
     pub fn render(
         &self,
-        data: &mut ::RenderData,
+        data: &mut ::render::RenderData,
         prev_area: &LayoutArea)
     {
         self.render_background(data, prev_area);
@@ -64,7 +64,7 @@ impl LayoutWidget {
 
     fn render_background(
         &self,
-        data: &mut ::RenderData,
+        data: &mut ::render::RenderData,
         area: &LayoutArea)
     {
         match self.background {
