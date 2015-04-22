@@ -60,32 +60,36 @@ impl LayoutWidget {
     pub fn render<
         R: gfx::Resources,
         O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>
+        C: gfx::CommandBuffer<R>,
+        F: gfx::Factory<R>
     >(
         &self,
-        output: &O,
+        output: &mut O,
         renderer: &mut gfx::Renderer<R, C>,
         render_helper: &mut ::RenderHelper<R>,
+        factory: &mut F,
         prev_area: &LayoutArea)
     {
-        self.render_background(output, renderer, render_helper, prev_area);
+        self.render_background(output, renderer, render_helper, factory, prev_area);
     }
 
     fn render_background<
         R: gfx::Resources,
         O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>
+        C: gfx::CommandBuffer<R>,
+        F: gfx::Factory<R>
     >(
         &self,
-        output: &O,
+        output: &mut O,
         renderer: &mut gfx::Renderer<R, C>,
         render_helper: &mut ::RenderHelper<R>,
+        factory: &mut F,
         area: &LayoutArea)
     {
         match self.background {
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                render_helper.draw_square();
+                render_helper.draw_square(output, renderer, factory);
             }
         }
     }

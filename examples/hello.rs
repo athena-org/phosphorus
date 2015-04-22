@@ -53,7 +53,7 @@ fn main() {
         });
 
         // Render our actual GUI
-        gui.render(&canvas.output, &mut canvas.renderer);
+        gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
 
         // Show the rendered to buffer on the screen
         canvas.present();

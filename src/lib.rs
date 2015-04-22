@@ -60,16 +60,19 @@ pub struct RenderHelper<R: gfx::Resources> {
 }
 
 impl<R: gfx::Resources> RenderHelper<R> {
-    pub fn draw_square(&mut self) {
+    pub fn draw_square<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(&mut self,
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F)
+    {
         let vertex_data = [
             Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
             Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
             Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] },
         ];
-        let test_mesh = canvas.factory.create_mesh(&vertex_data);
+        let test_mesh = factory.create_mesh(&vertex_data);
         let slice = test_mesh.to_slice(gfx::PrimitiveType::TriangleList);
-
-        let batch = gfx::batch::bind(&self.draw_state, &test_mesh, slice.clone(), &self.solid_color_program, &None);
+        let data = None;
+        let batch = gfx::batch::bind(&self.draw_state, &test_mesh, slice.clone(), &self.solid_color_program, &data);
+        renderer.draw(&batch, output);
     }
 }
 
@@ -102,17 +105,19 @@ impl<R: gfx::Resources> Gui<R> {
 
     pub fn render<
         O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>
+        C: gfx::CommandBuffer<R>,
+        F: gfx::Factory<R>
     >(
         &mut self,
-        output: &O,
-        renderer: &mut gfx::Renderer<R, C>)
+        output: &mut O,
+        renderer: &mut gfx::Renderer<R, C>,
+        factory: &mut F)
     {
         let (x, y) = output.get_size();
         let area = widgets::LayoutArea {
             position: [0, 0],
             size: [x, y]
         };
-        self.root.render(output, renderer, &mut self.render_helper, &area);
+        self.root.render(output, renderer, &mut self.render_helper, factory, &area);
     }
 }
