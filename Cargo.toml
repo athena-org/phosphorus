@@ -32,6 +32,9 @@ plugin = true
 [dependencies.cgmath]
 git = "https://github.com/bjz/cgmath-rs"
 
+[dependencies.freetype-rs]
+git = "https://github.com/PistonDevelopers/freetype-rs"
+
 [dev-dependencies.glutin]
 git = "https://github.com/tomaka/glutin"
 
