@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate gfx;
-
+use gfx;
 use gfx::traits::*;
+use cgmath;
+use cgmath::FixedArray;
 
 static VERTEX_SRC: &'static [u8] = b"
     #version 120
@@ -23,9 +24,11 @@ static VERTEX_SRC: &'static [u8] = b"
     attribute vec3 a_Color;
     varying vec4 v_Color;
 
+    uniform mat4 u_Transform;
+
     void main() {
         v_Color = vec4(a_Color, 1.0);
-        gl_Position = vec4(a_Pos, 0.0, 1.0);
+        gl_Position = u_Transform * vec4(a_Pos, 0.0, 1.0);
     }
 ";
 
@@ -47,6 +50,14 @@ struct Vertex {
 
     #[name = "a_Color"]
     color: [f32; 3],
+}
+
+#[shader_param]
+struct Params<R: gfx::Resources> {
+    #[name = "u_Transform"]
+    transform: [[f32; 4]; 4],
+
+    _dummy: ::std::marker::PhantomData<R>
 }
 
 pub struct RenderHelper<R: gfx::Resources> {
@@ -79,8 +90,14 @@ impl<R: gfx::Resources> RenderHelper<R> {
         factory: &mut F,
         data: RenderData)
     {
+        let proj = cgmath::ortho::<f32>(0.0, 1280.0, 720.0, 0.0, 1.0, -1.0);
+        let params = Params::<R> {
+            transform: proj.into_fixed(),
+            _dummy: ::std::marker::PhantomData
+        };
+
         let rects_mesh = RenderHelper::<R>::create_rects_mesh(factory, data.rectangles);
-        self.render_rects_mesh(output, renderer, rects_mesh);
+        self.render_rects_mesh(output, renderer, &params, rects_mesh);
     }
 
     fn create_rects_mesh<F: gfx::Factory<R>>(factory: &mut F, rects: Vec<RectangleData>) -> gfx::Mesh<R> {
@@ -88,12 +105,12 @@ impl<R: gfx::Resources> RenderHelper<R> {
 
         for rect in rects {
             // Add our rectangle's vertices
-            vertices.push(Vertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
             vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
             vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
 
-            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
             vertices.push(Vertex { pos: [ rect.end[0], rect.end[1] ], color: rect.color });
+            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
             vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
         }
 
@@ -104,11 +121,10 @@ impl<R: gfx::Resources> RenderHelper<R> {
     fn render_rects_mesh<O: gfx::Output<R>, C: gfx::CommandBuffer<R>>(
         &self,
         output: &mut O, renderer: &mut gfx::Renderer<R, C>,
-        mesh: gfx::Mesh<R>)
+        params: &Params<R>, mesh: gfx::Mesh<R>)
     {
         let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
-        let data = None;
-        let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.solid_color_program, &data);
+        let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.solid_color_program, params);
         renderer.draw(&batch, output).unwrap();
     }
 }
@@ -132,8 +148,8 @@ impl RenderData {
 
     pub fn push_rectangle(&mut self, color: [f32;3]) {
         let data = RectangleData {
-            start: [-0.5, -0.5],
-            end: [0.5, 0.5],
+            start: [0.0, 0.0],
+            end: [50.0, 50.0],
             color: color
         };
 
