@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use widgets;
 use render;
 
 pub struct LayoutArea {
@@ -37,6 +38,10 @@ impl LayoutWidgetBuilder {
 
     pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder {
         self.background = LayoutBackground::Color(color);
+        self
+    }
+
+    pub fn with_widget(mut self, widget: Box<widgets::Widget>) -> LayoutWidgetBuilder {
         self
     }
 

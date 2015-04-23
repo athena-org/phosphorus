@@ -33,6 +33,12 @@ fn main() {
     // Set up our phosphorus gui
     let root = phosphorus::widgets::LayoutWidgetBuilder::new()
         .with_background_color([0.9, 0.3, 0.3])
+        .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
+            .with_text("Hello World!")
+            .build_boxed())
+        .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
+            .with_text("Hello again, World!")
+            .build_boxed())
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 

@@ -12,11 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod layout;
-mod text;
+use widgets;
 
-pub use widgets::layout::*;
-pub use widgets::text::*;
+pub struct TextWidgetBuilder {
+    text: String
+}
 
-pub trait Widget {
+impl TextWidgetBuilder {
+    pub fn new() -> TextWidgetBuilder {
+        TextWidgetBuilder {
+            text: String::new()
+        }
+    }
+
+    pub fn with_text(mut self, text: &str) -> TextWidgetBuilder {
+        self.text = String::from(text);
+        self
+    }
+
+    pub fn build_boxed(self) -> Box<TextWidget> {
+        Box::new(TextWidget {
+            text: self.text
+        })
+    }
+}
+
+pub struct TextWidget {
+    text: String
+}
+
+impl widgets::Widget for TextWidget {
 }
