@@ -54,7 +54,7 @@ impl<R: gfx::Resources> Gui<R> {
 
         // Set up a layout area to the whole screen
         let (x, y) = output.get_size();
-        let area = widgets::LayoutArea {
+        let area = widgets::RenderArea {
             position: [0, 0],
             size: [x, y]
         };

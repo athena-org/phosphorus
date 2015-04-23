@@ -32,7 +32,7 @@ fn main() {
 
     // Set up our phosphorus gui
     let root = phosphorus::widgets::LayoutWidgetBuilder::new()
-        .with_background_color([0.9, 0.3, 0.3])
+        .with_background_color([0.082, 0.090, 0.094])
         .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
             .with_text("Hello World!")
             .build_boxed())
@@ -50,14 +50,7 @@ fn main() {
                 _ => (),
             }
         }
-
-        // Clear in so we don't have lingering stuff from the last frame
-        canvas.clear(gfx::ClearData {
-            color: [0.3, 0.3, 0.9, 1.0],
-            depth: 1.0,
-            stencil: 0,
-        });
-
+        
         // Render our actual GUI
         gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
 

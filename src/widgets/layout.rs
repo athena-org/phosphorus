@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::default::*;
 use widgets;
 use render;
-
-pub struct LayoutArea {
-    pub position: [u16;2],
-    pub size: [u16;2]
-}
 
 pub enum LayoutBackground {
     None,
     Color([f32;3])
 }
 
+impl Default for LayoutBackground {
+    fn default() -> LayoutBackground { LayoutBackground::None }
+}
+
+#[derive(Default)]
 pub struct LayoutWidgetBuilder {
-    background: LayoutBackground
+    background: LayoutBackground,
+    widgets: Vec<Box<widgets::Widget>>
 }
 
 impl LayoutWidgetBuilder {
     pub fn new() -> LayoutWidgetBuilder {
-        LayoutWidgetBuilder {
-            background: LayoutBackground::None
-        }
+        LayoutWidgetBuilder::default()
     }
 
     pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder {
@@ -42,18 +42,21 @@ impl LayoutWidgetBuilder {
     }
 
     pub fn with_widget(mut self, widget: Box<widgets::Widget>) -> LayoutWidgetBuilder {
+        self.widgets.push(widget);
         self
     }
 
     pub fn build(self) -> LayoutWidget {
         LayoutWidget {
-            background: self.background
+            background: self.background,
+            widgets: self.widgets
         }
     }
 }
 
 pub struct LayoutWidget {
-    background: LayoutBackground
+    background: LayoutBackground,
+    widgets: Vec<Box<widgets::Widget>>
 }
 
 impl LayoutWidget {
@@ -61,18 +64,21 @@ impl LayoutWidget {
         self.background = background;
     }
 
-    pub fn render(
-        &self,
-        data: &mut render::RenderData,
-        prev_area: &LayoutArea)
+    pub fn render(&self, data: &mut render::RenderData, prev_area: &widgets::RenderArea)
     {
         self.render_background(data, prev_area);
+
+        // Render all child widgets
+        let mut offset = widgets::RenderOffset {position: [0, 0]};
+        for widget in &self.widgets {
+            widget.render(data, prev_area, &mut offset);
+        }
     }
 
     fn render_background(
         &self,
         data: &mut render::RenderData,
-        area: &LayoutArea)
+        area: &widgets::RenderArea)
     {
         match self.background {
             // Different background types render differently

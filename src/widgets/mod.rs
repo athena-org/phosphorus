@@ -12,11 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use render;
+
 mod layout;
 mod text;
 
 pub use widgets::layout::*;
 pub use widgets::text::*;
 
+pub struct RenderArea {
+    pub position: [u16;2],
+    pub size: [u16;2]
+}
+
+pub struct RenderOffset {
+    pub position: [u16;2]
+}
+
 pub trait Widget {
+    fn render(
+        &self, data: &mut render::RenderData,
+        prev_area: &RenderArea, offset: &mut RenderOffset);
 }
