@@ -19,7 +19,7 @@ use cgmath;
 use cgmath::FixedArray;
 
 static VERTEX_SRC: &'static [u8] = b"
-    #version 120
+    #version 130
 
     attribute ivec2 a_Pos;
     attribute vec3 a_Color;
@@ -34,7 +34,7 @@ static VERTEX_SRC: &'static [u8] = b"
 ";
 
 static FRAGMENT_SRC: &'static [u8] = b"
-    #version 120
+    #version 130
 
     varying vec4 v_Color;
 
