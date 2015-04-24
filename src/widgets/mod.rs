@@ -14,9 +14,11 @@
 
 use render;
 
+mod image;
 mod layout;
 mod text;
 
+pub use widgets::image::*;
 pub use widgets::layout::*;
 pub use widgets::text::*;
 

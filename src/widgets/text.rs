@@ -56,7 +56,7 @@ impl widgets::Widget for TextWidget {
 
         // Quick notes for implementing showing text:
         // https://github.com/PistonDevelopers/gfx_texture
-        // https://github.com/kvark/claymore/blob/master/src/load/lib.rs#L133-L139
+        // https://github.com/kvark/claymore/blob/master/src/load/lib.rs#L114-L119
         // https://github.com/retep998/winapi-rs/blob/master/lib/user32-sys/src/lib.rs#L351
         // http://stackoverflow.com/questions/14762456/getclipboarddatacf-text
     }

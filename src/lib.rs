@@ -16,6 +16,7 @@
 #![plugin(gfx_macros)]
 
 extern crate gfx;
+extern crate gfx_texture;
 extern crate cgmath;
 
 use gfx::traits::*;
