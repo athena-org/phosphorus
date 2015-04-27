@@ -12,30 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::default::*;
 use gfx;
 use gfx_texture;
 use widgets;
 use render;
 
 pub struct ImageWidgetBuilder {
-    image_path: String,
+    image_source: String,
     size: [u16;2]
 }
 
+impl Default for ImageWidgetBuilder {
+    fn default() -> ImageWidgetBuilder {
+        ImageWidgetBuilder {
+            image_source: String::default(),
+            size: [0, 0]
+        }
+    }
+}
+
 impl ImageWidgetBuilder {
-    fn with_image(mut self, path: String) -> ImageWidgetBuilder {
-        self.image_path = path;
+    pub fn new() -> ImageWidgetBuilder {
+        ImageWidgetBuilder::default()
+    }
+
+    pub fn with_source(mut self, source: &str) -> ImageWidgetBuilder {
+        self.image_source = String::from(source);
         self
     }
 
-    fn with_size(mut self, size: [u16;2]) -> ImageWidgetBuilder {
+    pub fn with_size(mut self, size: [u16;2]) -> ImageWidgetBuilder {
         self.size = size;
         self
     }
 
-    fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<ImageWidget<R>> {
+    pub fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<ImageWidget<R>> {
         let mut settings = gfx_texture::Settings::new();
-        let tex = gfx_texture::Texture::from_path(factory, self.image_path, &settings).unwrap();
+        let tex = gfx_texture::Texture::from_path(factory, self.image_source, &settings).unwrap();
 
         Box::new(ImageWidget {
             texture: tex,
@@ -54,6 +68,10 @@ impl<R: gfx::Resources> widgets::Widget for ImageWidget<R> {
         &self, data: &mut render::RenderData,
         prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
     {
+        let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
+        data.push_rectangle(pos, self.size, [0.0, 1.0, 1.0]);
+
+        // Increment the rendering offset for the next widget
         offset.position[1] += self.size[1];
     }
 }

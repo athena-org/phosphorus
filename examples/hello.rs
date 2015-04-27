@@ -39,6 +39,10 @@ fn main() {
         .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
             .with_text("Hello again, World!")
             .build_boxed())
+        .with_widget(phosphorus::widgets::ImageWidgetBuilder::new()
+            .with_source("./assets/test.png")
+            .with_size([200, 200])
+            .build_boxed(&mut canvas.factory))
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 
@@ -50,7 +54,7 @@ fn main() {
                 _ => (),
             }
         }
-        
+
         // Render our actual GUI
         gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
 
