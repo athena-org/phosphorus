@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use gfx;
 use render;
 
 mod image;
@@ -31,8 +32,8 @@ pub struct RenderOffset {
     pub position: [u16;2]
 }
 
-pub trait Widget {
+pub trait Widget<R: gfx::Resources> {
     fn render(
-        &self, data: &mut render::RenderData,
+        &self, data: &mut render::RenderData<R>,
         prev_area: &RenderArea, offset: &mut RenderOffset);
 }

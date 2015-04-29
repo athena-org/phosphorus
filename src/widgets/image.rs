@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::default::*;
+use std::default::Default;
 use gfx;
 use gfx_texture;
 use widgets;
@@ -63,9 +63,9 @@ pub struct ImageWidget<R: gfx::Resources> {
     size: [u16;2]
 }
 
-impl<R: gfx::Resources> widgets::Widget for ImageWidget<R> {
+impl<R: gfx::Resources> widgets::Widget<R> for ImageWidget<R> {
     fn render(
-        &self, data: &mut render::RenderData,
+        &self, data: &mut render::RenderData<R>,
         prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];

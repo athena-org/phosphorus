@@ -15,46 +15,48 @@
 use std;
 use gfx;
 use gfx::traits::*;
+use gfx_texture;
 use cgmath;
 use cgmath::FixedArray;
 
-static VERTEX_SRC: &'static [u8] = b"
+static COLORED_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
 
-    attribute ivec2 a_Pos;
-    attribute vec3 a_Color;
-    varying vec4 v_Color;
+    in ivec2 i_Pos;
+    in vec3 i_Color;
+    out vec4 v_Color;
 
     uniform mat4 u_Transform;
 
     void main() {
-        v_Color = vec4(a_Color, 1.0);
-        gl_Position = u_Transform * vec4(a_Pos, 0.0, 1.0);
+        v_Color = vec4(i_Color, 1.0);
+        gl_Position = u_Transform * vec4(i_Pos, 0.0, 1.0);
     }
 ";
 
-static FRAGMENT_SRC: &'static [u8] = b"
+static COLORED_FRAGMENT_SRC: &'static [u8] = b"
     #version 150 core
 
-    varying vec4 v_Color;
+    in vec4 v_Color;
+    out vec4 o_Color;
 
     void main() {
-        gl_FragColor = v_Color;
+        o_Color = v_Color;
     }
 ";
 
 #[vertex_format]
 #[derive(Clone, Copy)]
-struct Vertex {
-    #[name = "a_Pos"]
+struct ColoredVertex {
+    #[name = "i_Pos"]
     pos: [u16; 2],
 
-    #[name = "a_Color"]
+    #[name = "i_Color"]
     color: [f32; 3],
 }
 
 #[shader_param]
-struct Params<R: gfx::Resources> {
+struct ColoredParams<R: gfx::Resources> {
     #[name = "u_Transform"]
     transform: [[f32; 4]; 4],
 
@@ -69,7 +71,7 @@ pub struct RenderHelper<R: gfx::Resources> {
 impl<R: gfx::Resources> RenderHelper<R> {
     pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderHelper<R> {
         // Set up the stuff we'll need to render
-        let solid_color_program = match factory.link_program(VERTEX_SRC, FRAGMENT_SRC) {
+        let solid_color_program = match factory.link_program(COLORED_VERTEX_SRC, COLORED_FRAGMENT_SRC) {
             Ok(v) => v,
             Err(e) => panic!(format!("{:?}", e))
         };
@@ -87,55 +89,58 @@ impl<R: gfx::Resources> RenderHelper<R> {
         F: gfx::Factory<R>
     >(
         &mut self,
-        output: &mut O,
-        renderer: &mut gfx::Renderer<R, C>,
-        factory: &mut F,
-        data: RenderData)
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        data: RenderData<R>)
     {
         // Prepare the uniforms to be used for rendering
         let (x, y) = output.get_size();
         let proj = cgmath::ortho::<f32>(0.0, x as f32, y as f32, 0.0, 1.0, -1.0);
-        let params = Params::<R> {
+        let params = ColoredParams::<R> {
             transform: proj.into_fixed(),
             _dummy: std::marker::PhantomData
         };
 
         // Render all rectangles
-        let rects_mesh = RenderHelper::<R>::create_rects_mesh(factory, data.rectangles);
-        self.render_rects_mesh(output, renderer, &params, rects_mesh);
-    }
-
-    fn create_rects_mesh<F: gfx::Factory<R>>(factory: &mut F, rects: Vec<RectangleData>) -> gfx::Mesh<R> {
-        let mut vertices = Vec::<Vertex>::new();
-
-        for rect in rects {
-            // Add our rectangle's vertices
-            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
-            vertices.push(Vertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
-            vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
-
-            vertices.push(Vertex { pos: [ rect.end[0], rect.end[1] ], color: rect.color });
-            vertices.push(Vertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
-            vertices.push(Vertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+        for rect in &data.rectangles {
+            self.render_rect(output, renderer, factory, rect, &params);
         }
-
-        // Turn the vertices into a mesh
-        factory.create_mesh(&vertices)
     }
 
-    fn render_rects_mesh<O: gfx::Output<R>, C: gfx::CommandBuffer<R>>(
+    fn render_rect<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
         &self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>,
-        params: &Params<R>, mesh: gfx::Mesh<R>)
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        rect: &RectangleData, params: &ColoredParams<R>)
     {
+        // Create a mesh from the rectangle
+        let mut vertices = Vec::<ColoredVertex>::new();
+        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
+        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
+        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.end[1] ], color: rect.color });
+        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
+        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+        let mesh = factory.create_mesh(&vertices);
+
+        // Actually render that mesh
         let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
         let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.solid_color_program, params);
         renderer.draw(&batch, output).unwrap();
     }
 }
 
-pub struct RenderData {
-    rectangles: Vec<RectangleData>
+pub struct RenderData<'a, R: gfx::Resources> where
+    R: 'a,
+    R::Buffer: 'a,
+    R::ArrayBuffer: 'a,
+    R::Shader: 'a,
+    R::Program: 'a,
+    R::FrameBuffer: 'a,
+    R::Surface: 'a,
+    R::Texture: 'a,
+    R::Sampler: 'a
+{
+    rectangles: Vec<RectangleData>,
+    textures: Vec<&'a gfx_texture::Texture<R>>
 }
 
 pub struct RectangleData {
@@ -144,8 +149,8 @@ pub struct RectangleData {
     color: [f32;3]
 }
 
-impl RenderData {
-    pub fn new() -> RenderData {
+impl<'a, R: gfx::Resources> RenderData<'a, R> {
+    pub fn new() -> RenderData<'a, R> {
         RenderData {
             rectangles: Vec::<RectangleData>::new()
         }
@@ -159,5 +164,8 @@ impl RenderData {
         };
 
         self.rectangles.push(data);
+    }
+
+    pub fn push_texture(&mut self, position: [u16;2], size: [u16;2], texture: &gfx_texture::Texture<R>) {
     }
 }

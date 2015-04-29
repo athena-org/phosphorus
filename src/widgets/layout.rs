@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::default::*;
+use gfx;
+use std::default::Default;
 use widgets;
 use render;
 
@@ -26,27 +27,27 @@ impl Default for LayoutBackground {
 }
 
 #[derive(Default)]
-pub struct LayoutWidgetBuilder {
+pub struct LayoutWidgetBuilder<R: gfx::Resources> {
     background: LayoutBackground,
-    widgets: Vec<Box<widgets::Widget>>
+    widgets: Vec<Box<widgets::Widget<R>>>
 }
 
-impl LayoutWidgetBuilder {
-    pub fn new() -> LayoutWidgetBuilder {
-        LayoutWidgetBuilder::default()
+impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
+    pub fn new() -> LayoutWidgetBuilder<R> {
+        LayoutWidgetBuilder::<R>::default()
     }
 
-    pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder {
+    pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder<R> {
         self.background = LayoutBackground::Color(color);
         self
     }
 
-    pub fn with_widget(mut self, widget: Box<widgets::Widget>) -> LayoutWidgetBuilder {
+    pub fn with_widget(mut self, widget: Box<widgets::Widget<R>>) -> LayoutWidgetBuilder<R> {
         self.widgets.push(widget);
         self
     }
 
-    pub fn build(self) -> LayoutWidget {
+    pub fn build(self) -> LayoutWidget<R> {
         LayoutWidget {
             background: self.background,
             widgets: self.widgets
@@ -54,17 +55,17 @@ impl LayoutWidgetBuilder {
     }
 }
 
-pub struct LayoutWidget {
+pub struct LayoutWidget<R: gfx::Resources> {
     background: LayoutBackground,
-    widgets: Vec<Box<widgets::Widget>>
+    widgets: Vec<Box<widgets::Widget<R>>>
 }
 
-impl LayoutWidget {
+impl<R: gfx::Resources> LayoutWidget<R> {
     pub fn set_background(&mut self, background: LayoutBackground) {
         self.background = background;
     }
 
-    pub fn render(&self, data: &mut render::RenderData, prev_area: &widgets::RenderArea)
+    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &widgets::RenderArea)
     {
         self.render_background(data, prev_area);
 
@@ -77,7 +78,7 @@ impl LayoutWidget {
 
     fn render_background(
         &self,
-        data: &mut render::RenderData,
+        data: &mut render::RenderData<R>,
         area: &widgets::RenderArea)
     {
         match self.background {

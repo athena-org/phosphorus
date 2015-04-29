@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std;
+use std::default::Default;
+use gfx;
 use widgets;
 use render;
 
+#[derive(Default)]
 pub struct TextWidgetBuilder {
     text: String
 }
 
 impl TextWidgetBuilder {
     pub fn new() -> TextWidgetBuilder {
-        TextWidgetBuilder {
-            text: String::new()
-        }
+        TextWidgetBuilder::default()
     }
 
     pub fn with_text(mut self, text: &str) -> TextWidgetBuilder {
@@ -31,20 +33,22 @@ impl TextWidgetBuilder {
         self
     }
 
-    pub fn build_boxed(self) -> Box<TextWidget> {
+    pub fn build_boxed<R: gfx::Resources>(self) -> Box<TextWidget<R>> {
         Box::new(TextWidget {
             text: self.text
         })
     }
 }
 
-pub struct TextWidget {
-    text: String
+pub struct TextWidget<R: gfx::Resources> {
+    text: String,
+
+    _dummy: std::marker::PhantomData<R>
 }
 
-impl widgets::Widget for TextWidget {
+impl<R: gfx::Resources> widgets::Widget<R> for TextWidget<R> {
     fn render(
-        &self, data: &mut render::RenderData,
+        &self, data: &mut render::RenderData<R>,
         prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
