@@ -35,7 +35,8 @@ impl TextWidgetBuilder {
 
     pub fn build_boxed<R: gfx::Resources>(self) -> Box<TextWidget<R>> {
         Box::new(TextWidget {
-            text: self.text
+            text: self.text,
+            _dummy: std::marker::PhantomData
         })
     }
 }

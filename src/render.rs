@@ -128,19 +128,11 @@ impl<R: gfx::Resources> RenderHelper<R> {
     }
 }
 
-pub struct RenderData<'a, R: gfx::Resources> where
-    R: 'a,
-    R::Buffer: 'a,
-    R::ArrayBuffer: 'a,
-    R::Shader: 'a,
-    R::Program: 'a,
-    R::FrameBuffer: 'a,
-    R::Surface: 'a,
-    R::Texture: 'a,
-    R::Sampler: 'a
+pub struct RenderData<R: gfx::Resources>
 {
     rectangles: Vec<RectangleData>,
-    textures: Vec<&'a gfx_texture::Texture<R>>
+    // TODO: Move this together with rectangles into a vector of render commands
+    textures: Vec<gfx::TextureHandle<R>>
 }
 
 pub struct RectangleData {
@@ -149,10 +141,11 @@ pub struct RectangleData {
     color: [f32;3]
 }
 
-impl<'a, R: gfx::Resources> RenderData<'a, R> {
-    pub fn new() -> RenderData<'a, R> {
+impl<R: gfx::Resources> RenderData<R> {
+    pub fn new() -> RenderData<R> {
         RenderData {
-            rectangles: Vec::<RectangleData>::new()
+            rectangles: Vec::new(),
+            textures: Vec::new()
         }
     }
 
@@ -166,6 +159,7 @@ impl<'a, R: gfx::Resources> RenderData<'a, R> {
         self.rectangles.push(data);
     }
 
-    pub fn push_texture(&mut self, position: [u16;2], size: [u16;2], texture: &gfx_texture::Texture<R>) {
+    pub fn push_texture(&mut self, position: [u16;2], size: [u16;2], texture: gfx::TextureHandle<R>) {
+        self.textures.push(texture);
     }
 }

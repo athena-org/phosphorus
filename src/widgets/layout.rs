@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use gfx;
-use std::default::Default;
 use widgets;
 use render;
 
@@ -22,11 +21,6 @@ pub enum LayoutBackground {
     Color([f32;3])
 }
 
-impl Default for LayoutBackground {
-    fn default() -> LayoutBackground { LayoutBackground::None }
-}
-
-#[derive(Default)]
 pub struct LayoutWidgetBuilder<R: gfx::Resources> {
     background: LayoutBackground,
     widgets: Vec<Box<widgets::Widget<R>>>
@@ -34,7 +28,10 @@ pub struct LayoutWidgetBuilder<R: gfx::Resources> {
 
 impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
     pub fn new() -> LayoutWidgetBuilder<R> {
-        LayoutWidgetBuilder::<R>::default()
+        LayoutWidgetBuilder {
+            background: LayoutBackground::None,
+            widgets: Vec::new()
+        }
     }
 
     pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder<R> {
