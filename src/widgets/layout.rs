@@ -82,7 +82,7 @@ impl<R: gfx::Resources> LayoutWidget<R> {
             // Different background types render differently
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                data.push_rectangle(area.position, area.size, c);
+                data.push_rect_flat(area.position, area.size, c);
             }
         }
     }

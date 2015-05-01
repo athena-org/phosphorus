@@ -15,11 +15,10 @@
 use std;
 use gfx;
 use gfx::traits::*;
-use gfx_texture;
 use cgmath;
 use cgmath::FixedArray;
 
-static COLORED_VERTEX_SRC: &'static [u8] = b"
+static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
 
     in ivec2 i_Pos;
@@ -34,7 +33,7 @@ static COLORED_VERTEX_SRC: &'static [u8] = b"
     }
 ";
 
-static COLORED_FRAGMENT_SRC: &'static [u8] = b"
+static FLAT_FRAGMENT_SRC: &'static [u8] = b"
     #version 150 core
 
     in vec4 v_Color;
@@ -47,7 +46,7 @@ static COLORED_FRAGMENT_SRC: &'static [u8] = b"
 
 #[vertex_format]
 #[derive(Clone, Copy)]
-struct ColoredVertex {
+struct FlatVertex {
     #[name = "i_Pos"]
     pos: [u16; 2],
 
@@ -56,7 +55,7 @@ struct ColoredVertex {
 }
 
 #[shader_param]
-struct ColoredParams<R: gfx::Resources> {
+struct FlatParams<R: gfx::Resources> {
     #[name = "u_Transform"]
     transform: [[f32; 4]; 4],
 
@@ -71,7 +70,7 @@ pub struct RenderHelper<R: gfx::Resources> {
 impl<R: gfx::Resources> RenderHelper<R> {
     pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderHelper<R> {
         // Set up the stuff we'll need to render
-        let solid_color_program = match factory.link_program(COLORED_VERTEX_SRC, COLORED_FRAGMENT_SRC) {
+        let solid_color_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
             Ok(v) => v,
             Err(e) => panic!(format!("{:?}", e))
         };
@@ -95,30 +94,58 @@ impl<R: gfx::Resources> RenderHelper<R> {
         // Prepare the uniforms to be used for rendering
         let (x, y) = output.get_size();
         let proj = cgmath::ortho::<f32>(0.0, x as f32, y as f32, 0.0, 1.0, -1.0);
-        let params = ColoredParams::<R> {
+        let params = FlatParams::<R> {
             transform: proj.into_fixed(),
             _dummy: std::marker::PhantomData
         };
 
         // Render all rectangles
-        for rect in &data.rectangles {
-            self.render_rect(output, renderer, factory, rect, &params);
+        for entry in &data.entries {
+            match entry {
+                &RenderEntry::Flat(ref data, color) =>
+                    self.render_rect_flat(output, renderer, factory, data, color, &params),
+                &RenderEntry::Textured(ref data, ref texture) =>
+                    self.render_rect_textured(output, renderer, factory, data, texture, &params)
+            }
         }
     }
 
-    fn render_rect<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
+    fn render_rect_flat<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
         &self,
         output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
-        rect: &RectangleData, params: &ColoredParams<R>)
+        rect: &Rectangle, color: [f32;3], params: &FlatParams<R>)
     {
         // Create a mesh from the rectangle
-        let mut vertices = Vec::<ColoredVertex>::new();
-        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
-        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.start[1] ], color: rect.color });
-        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
-        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.end[1] ], color: rect.color });
-        vertices.push(ColoredVertex { pos: [ rect.end[0], rect.start[1] ], color: rect.color });
-        vertices.push(ColoredVertex { pos: [ rect.start[0], rect.end[1] ], color: rect.color });
+        let mut vertices = Vec::<FlatVertex>::new();
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
+        let mesh = factory.create_mesh(&vertices);
+
+        // Actually render that mesh
+        let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
+        let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.solid_color_program, params);
+        renderer.draw(&batch, output).unwrap();
+    }
+
+    fn render_rect_textured<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
+        &self,
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        rect: &Rectangle, texture: &gfx::TextureHandle<R>, params: &FlatParams<R>)
+    {
+        let color: [f32;3] = [1.0, 0.0, 1.0];
+
+        // Create a mesh from the rectangle
+        let mut vertices = Vec::<FlatVertex>::new();
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
         let mesh = factory.create_mesh(&vertices);
 
         // Actually render that mesh
@@ -128,38 +155,42 @@ impl<R: gfx::Resources> RenderHelper<R> {
     }
 }
 
-pub struct RenderData<R: gfx::Resources>
-{
-    rectangles: Vec<RectangleData>,
-    // TODO: Move this together with rectangles into a vector of render commands
-    textures: Vec<gfx::TextureHandle<R>>
+pub struct Rectangle {
+    start: [u16;2],
+    end: [u16;2]
 }
 
-pub struct RectangleData {
-    start: [u16;2],
-    end: [u16;2],
-    color: [f32;3]
+impl Rectangle {
+    fn new(position: [u16;2], size: [u16;2]) -> Rectangle {
+        Rectangle {
+            start: [position[0], position[1]],
+            end: [position[0] + size[0], position[1] + size[1]]
+        }
+    }
+}
+
+pub enum RenderEntry<R: gfx::Resources> {
+    Flat(Rectangle, [f32;3]),
+    Textured(Rectangle, gfx::TextureHandle<R>)
+}
+
+pub struct RenderData<R: gfx::Resources>
+{
+    entries: Vec<RenderEntry<R>>
 }
 
 impl<R: gfx::Resources> RenderData<R> {
     pub fn new() -> RenderData<R> {
         RenderData {
-            rectangles: Vec::new(),
-            textures: Vec::new()
+            entries: Vec::new()
         }
     }
 
-    pub fn push_rectangle(&mut self, position: [u16;2], size: [u16;2], color: [f32;3]) {
-        let data = RectangleData {
-            start: [position[0], position[1]],
-            end: [position[0] + size[0], position[1] + size[1]],
-            color: color
-        };
-
-        self.rectangles.push(data);
+    pub fn push_rect_flat(&mut self, position: [u16;2], size: [u16;2], color: [f32;3]) {
+        self.entries.push(RenderEntry::Flat(Rectangle::new(position, size), color));
     }
 
-    pub fn push_texture(&mut self, position: [u16;2], size: [u16;2], texture: gfx::TextureHandle<R>) {
-        self.textures.push(texture);
+    pub fn push_rect_textured(&mut self, position: [u16;2], size: [u16;2], texture: gfx::TextureHandle<R>) {
+        self.entries.push(RenderEntry::Textured(Rectangle::new(position, size), texture));
     }
 }

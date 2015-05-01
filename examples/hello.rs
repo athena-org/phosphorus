@@ -25,7 +25,7 @@ fn main() {
     // Set up our window
     let window = glutin::WindowBuilder::new()
         .with_vsync()
-        .with_dimensions(1280, 720)
+        .with_dimensions(600, 500)
         .with_title(String::from("Hello"))
         .build_strict().unwrap();
     let mut canvas = gfx_window_glutin::init(window).into_canvas();

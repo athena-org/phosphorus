@@ -48,7 +48,7 @@ impl ImageWidgetBuilder {
     }
 
     pub fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<ImageWidget<R>> {
-        let mut settings = gfx_texture::Settings::new();
+        let settings = gfx_texture::Settings::new();
         let tex = gfx_texture::Texture::from_path(factory, self.image_source, &settings).unwrap();
 
         Box::new(ImageWidget {
@@ -69,7 +69,7 @@ impl<R: gfx::Resources> widgets::Widget<R> for ImageWidget<R> {
         prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
-        data.push_rectangle(pos, self.size, [0.0, 1.0, 1.0]);
+        data.push_rect_textured(pos, self.size, self.texture.handle());
 
         // Increment the rendering offset for the next widget
         offset.position[1] += self.size[1];

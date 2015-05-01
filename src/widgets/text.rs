@@ -54,7 +54,7 @@ impl<R: gfx::Resources> widgets::Widget<R> for TextWidget<R> {
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
         let size = [(self.text.len()*20) as u16, 20];
-        data.push_rectangle(pos, size, [0.0, 1.0, 1.0]);
+        data.push_rect_flat(pos, size, [0.0, 1.0, 1.0]);
 
         // Increment the rendering offset for the next widget
         offset.position[1] += size[1];
