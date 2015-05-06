@@ -34,8 +34,9 @@ impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
         }
     }
 
-    pub fn with_background_color(mut self, color: [f32;3]) -> LayoutWidgetBuilder<R> {
-        self.background = LayoutBackground::Color(color);
+    pub fn with_background_color(mut self, color: [u8;3]) -> LayoutWidgetBuilder<R> {
+        let rgb = [(color[0] as f32)/255.0, (color[1] as f32)/255.0, (color[2] as f32)/255.0];
+        self.background = LayoutBackground::Color(rgb);
         self
     }
 

@@ -25,14 +25,16 @@ fn main() {
     // Set up our window
     let window = glutin::WindowBuilder::new()
         .with_vsync()
+        //.with_srgb(Some(false))
         .with_dimensions(600, 500)
         .with_title(String::from("Hello"))
         .build_strict().unwrap();
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
+    canvas.output.set_gamma(gfx::Gamma::Original).unwrap();
 
     // Set up our phosphorus gui
     let root = phosphorus::widgets::LayoutWidgetBuilder::new()
-        .with_background_color([0.082, 0.090, 0.094])
+        .with_background_color([21, 23, 24])
         .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
             .with_text("Hello World!")
             .build_boxed())

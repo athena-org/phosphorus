@@ -97,7 +97,7 @@ struct TexturedVertex {
     pos: [u16;2],
 
     #[name = "i_TexCoord"]
-    tex_coord: [f32;2],
+    tex_coord: [f32;2]
 }
 
 #[shader_param]
@@ -160,6 +160,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
         };
 
         // Render all rectangles
+        // TODO: This requires some serious optimization but it will work for now
         for entry in &data.entries {
             match entry {
                 &RenderEntry::Flat(ref data, color) =>
@@ -218,6 +219,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
     }
 }
 
+#[derive(Debug)]
 struct Rectangle {
     start: [u16;2],
     end: [u16;2]
