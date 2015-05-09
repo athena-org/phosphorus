@@ -195,7 +195,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
     fn render_rect_textured<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
         &self,
         output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
-        rect: &Rectangle, texture: &gfx::TextureHandle<R>, proj: &[[f32;4];4])
+        rect: &Rectangle, texture: &gfx::handle::Texture<R>, proj: &[[f32;4];4])
     {
         let textured_params = TexturedParams::<R> {
             transform: proj.clone(),
@@ -236,7 +236,7 @@ impl Rectangle {
 
 enum RenderEntry<R: gfx::Resources> {
     Flat(Rectangle, [f32;3]),
-    Textured(Rectangle, gfx::TextureHandle<R>)
+    Textured(Rectangle, gfx::handle::Texture<R>)
 }
 
 pub struct RenderData<R: gfx::Resources>
@@ -255,7 +255,7 @@ impl<R: gfx::Resources> RenderData<R> {
         self.entries.push(RenderEntry::Flat(Rectangle::new(position, size), color));
     }
 
-    pub fn push_rect_textured(&mut self, position: [u16;2], size: [u16;2], texture: gfx::TextureHandle<R>) {
+    pub fn push_rect_textured(&mut self, position: [u16;2], size: [u16;2], texture: gfx::handle::Texture<R>) {
         self.entries.push(RenderEntry::Textured(Rectangle::new(position, size), texture));
     }
 }
