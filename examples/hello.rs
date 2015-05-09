@@ -25,7 +25,6 @@ fn main() {
     // Set up our window
     let window = glutin::WindowBuilder::new()
         .with_vsync()
-        //.with_srgb(Some(false))
         .with_dimensions(600, 500)
         .with_title(String::from("Hello"))
         .build_strict().unwrap();
