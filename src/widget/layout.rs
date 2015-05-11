@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use gfx;
-use widgets;
+use widget;
 use render;
 
 pub enum LayoutBackground {
@@ -23,7 +23,7 @@ pub enum LayoutBackground {
 
 pub struct LayoutWidgetBuilder<R: gfx::Resources> {
     background: LayoutBackground,
-    widgets: Vec<Box<widgets::Widget<R>>>
+    widgets: Vec<Box<widget::Widget<R>>>
 }
 
 impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
@@ -40,7 +40,7 @@ impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
         self
     }
 
-    pub fn with_widget(mut self, widget: Box<widgets::Widget<R>>) -> LayoutWidgetBuilder<R> {
+    pub fn with_widget(mut self, widget: Box<widget::Widget<R>>) -> LayoutWidgetBuilder<R> {
         self.widgets.push(widget);
         self
     }
@@ -55,7 +55,7 @@ impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
 
 pub struct LayoutWidget<R: gfx::Resources> {
     background: LayoutBackground,
-    widgets: Vec<Box<widgets::Widget<R>>>
+    widgets: Vec<Box<widget::Widget<R>>>
 }
 
 impl<R: gfx::Resources> LayoutWidget<R> {
@@ -63,12 +63,12 @@ impl<R: gfx::Resources> LayoutWidget<R> {
         self.background = background;
     }
 
-    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &widgets::RenderArea)
+    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &widget::RenderArea)
     {
         self.render_background(data, prev_area);
 
         // Render all child widgets
-        let mut offset = widgets::RenderOffset {position: [0, 0]};
+        let mut offset = widget::RenderOffset {position: [0, 0]};
         for widget in &self.widgets {
             widget.render(data, prev_area, &mut offset);
         }
@@ -77,7 +77,7 @@ impl<R: gfx::Resources> LayoutWidget<R> {
     fn render_background(
         &self,
         data: &mut render::RenderData<R>,
-        area: &widgets::RenderArea)
+        area: &widget::RenderArea)
     {
         match self.background {
             // Different background types render differently

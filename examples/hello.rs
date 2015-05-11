@@ -32,21 +32,22 @@ fn main() {
     canvas.output.set_gamma(gfx::Gamma::Original).unwrap();
 
     // Set up our phosphorus gui
-    let root = phosphorus::widgets::LayoutWidgetBuilder::new()
+    let root = phosphorus::widget::LayoutWidgetBuilder::new()
         .with_background_color([21, 23, 24])
-        .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
+        .with_widget(phosphorus::widget::TextWidgetBuilder::new()
             .with_text("Hello World!")
             .build_boxed())
-        .with_widget(phosphorus::widgets::TextWidgetBuilder::new()
+        .with_widget(phosphorus::widget::TextWidgetBuilder::new()
             .with_text("Hello again, World!")
             .build_boxed())
-        .with_widget(phosphorus::widgets::ImageWidgetBuilder::new()
-            .with_source("./assets/test.png")
+        .with_widget(phosphorus::widget::ImageWidgetBuilder::new()
+            .with_source("./examples/assets/test.png")
             .with_size([200, 200])
             .build_boxed(&mut canvas.factory))
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 
+    // Run our actual UI loop
     'main: loop {
         // Quit when the window is closed
         for event in canvas.output.window.poll_events() {

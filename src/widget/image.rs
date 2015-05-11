@@ -15,7 +15,7 @@
 use std::default::Default;
 use gfx;
 use gfx_texture;
-use widgets;
+use widget;
 use render;
 
 pub struct ImageWidgetBuilder {
@@ -63,10 +63,10 @@ pub struct ImageWidget<R: gfx::Resources> {
     size: [u16;2]
 }
 
-impl<R: gfx::Resources> widgets::Widget<R> for ImageWidget<R> {
+impl<R: gfx::Resources> widget::Widget<R> for ImageWidget<R> {
     fn render(
         &self, data: &mut render::RenderData<R>,
-        prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
+        prev_area: &widget::RenderArea, offset: &mut widget::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
         data.push_rect_textured(pos, self.size, self.texture.handle());

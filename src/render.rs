@@ -13,10 +13,11 @@
 // limitations under the License.
 
 use std;
-use gfx;
-use gfx::traits::*;
 use cgmath;
 use cgmath::FixedArray;
+use ft;
+use gfx;
+use gfx::traits::*;
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -133,6 +134,11 @@ impl<R: gfx::Resources> RenderHelper<R> {
             gfx::tex::SamplerInfo::new(
                 gfx::tex::FilterMethod::Bilinear,
                 gfx::tex::WrapMode::Clamp));
+
+        // Initialize FreeType
+        let library = ft::Library::init().unwrap();
+        let face = library.new_face("examples/assets/Roboto-Regular.ttf", 0).unwrap();
+        face.set_pixel_sizes(0, 13);
 
         RenderHelper {
             flat_program: flat_program,

@@ -15,25 +15,26 @@
 #![feature(plugin, custom_attribute)]
 #![plugin(gfx_macros)]
 
+extern crate cgmath;
+extern crate freetype as ft;
 extern crate gfx;
 extern crate gfx_texture;
-extern crate cgmath;
 
 use gfx::traits::*;
 
 mod render;
-pub mod widgets;
+pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {
-    root: widgets::LayoutWidget<R>,
+    root: widget::LayoutWidget<R>,
     render_helper: render::RenderHelper<R>
 }
 
 impl<R: gfx::Resources> Gui<R> {
-    pub fn root(&self) -> &widgets::LayoutWidget<R> { &self.root }
-    pub fn root_mut(&mut self) -> &mut widgets::LayoutWidget<R> { &mut self.root }
+    pub fn root(&self) -> &widget::LayoutWidget<R> { &self.root }
+    pub fn root_mut(&mut self) -> &mut widget::LayoutWidget<R> { &mut self.root }
 
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widgets::LayoutWidget<R>) -> Gui<R> {
+    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::LayoutWidget<R>) -> Gui<R> {
         Gui {
             root: root,
             render_helper: render::RenderHelper::new(factory)
@@ -55,7 +56,7 @@ impl<R: gfx::Resources> Gui<R> {
 
         // Set up a layout area to the whole screen
         let (x, y) = output.get_size();
-        let area = widgets::RenderArea {
+        let area = widget::RenderArea {
             position: [0, 0],
             size: [x, y]
         };

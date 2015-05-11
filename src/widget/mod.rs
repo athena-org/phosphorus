@@ -19,9 +19,9 @@ mod image;
 mod layout;
 mod text;
 
-pub use widgets::image::*;
-pub use widgets::layout::*;
-pub use widgets::text::*;
+pub use widget::image::*;
+pub use widget::layout::*;
+pub use widget::text::*;
 
 pub struct RenderArea {
     pub position: [u16;2],

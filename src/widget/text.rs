@@ -15,7 +15,7 @@
 use std;
 use std::default::Default;
 use gfx;
-use widgets;
+use widget;
 use render;
 
 #[derive(Default)]
@@ -47,10 +47,10 @@ pub struct TextWidget<R: gfx::Resources> {
     _dummy: std::marker::PhantomData<R>
 }
 
-impl<R: gfx::Resources> widgets::Widget<R> for TextWidget<R> {
+impl<R: gfx::Resources> widget::Widget<R> for TextWidget<R> {
     fn render(
         &self, data: &mut render::RenderData<R>,
-        prev_area: &widgets::RenderArea, offset: &mut widgets::RenderOffset)
+        prev_area: &widget::RenderArea, offset: &mut widget::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
         let size = [(self.text.len()*20) as u16, 20];
