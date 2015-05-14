@@ -44,6 +44,9 @@ fn main() {
             .with_source("./examples/assets/test.png")
             .with_size([200, 200])
             .build_boxed(&mut canvas.factory))
+        .with_widget(phosphorus::widget::TextWidgetBuilder::new()
+            .with_text("Hello from after the image!")
+            .build_boxed())
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 

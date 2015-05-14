@@ -137,7 +137,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
                 gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
-        let mut text_renderer = gfx_text::new(factory).build().unwrap();
+        let text_renderer = gfx_text::new(factory).with_size(13).build().unwrap();
 
         RenderHelper {
             flat_program: flat_program,
@@ -173,8 +173,11 @@ impl<R: gfx::Resources> RenderHelper<R> {
                     self.render_rect_flat(output, renderer, factory, rectangle, color, &flat_params),
                 &RenderEntry::Textured(ref rectangle, ref texture) =>
                     self.render_rect_textured(output, renderer, factory, rectangle, texture, &proj),
-                &RenderEntry::Text(ref position, ref string) =>
-                    self.render_text(output, renderer, factory, position, string)
+                &RenderEntry::Text(ref position, ref string) => {
+                    let position: [i32; 2] = [position[0] as i32, position[1] as i32];
+                    let mut stream = (renderer as &mut gfx::Renderer<R, C>, output as &O);
+                    self.render_text(factory, &mut stream, position, string);
+                }
             }
         }
     }
@@ -226,20 +229,17 @@ impl<R: gfx::Resources> RenderHelper<R> {
         renderer.draw(&batch, output).unwrap();
     }
 
-    fn render_text<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
-        &self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
-        position: &[u16;2], text: &String)
+    fn render_text<F: gfx::Factory<R>, S: Stream<R>>(
+        &mut self,
+        factory: &mut F, stream: &mut S,
+        position: [i32; 2], text: &String)
     {
-        // Draw some text 10 pixels down and right from the top left screen corner.
-        /*text.draw(
-            "The quick brown fox jumps over the lazy dog",  // Text to draw
-            [10, 10],                                       // Position
-            [0.65, 0.16, 0.16, 1.0],                        // Text color
-        );*/
-
-        // Render the final batch.
-        //text.draw_end(&mut canvas);
+        self.text_renderer.draw(
+            text,
+            position,
+            [1.0, 1.0, 1.0, 1.0],
+        );
+        self.text_renderer.sdraw_end(factory, stream).unwrap();
     }
 }
 
