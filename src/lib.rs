@@ -16,13 +16,13 @@
 #![plugin(gfx_macros)]
 
 extern crate cgmath;
-extern crate freetype as ft;
 extern crate gfx;
+extern crate gfx_text;
 extern crate gfx_texture;
 
 use gfx::traits::*;
 
-mod render;
+pub mod render;
 pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {

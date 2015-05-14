@@ -35,8 +35,8 @@ git = "https://github.com/PistonDevelopers/gfx_texture"
 [dependencies.cgmath]
 git = "https://github.com/bjz/cgmath-rs"
 
-[dependencies.freetype-rs]
-git = "https://github.com/PistonDevelopers/freetype-rs"
+[dependencies.gfx_text]
+git = "https://github.com/PistonDevelopers/gfx_text"
 
 [dev-dependencies.glutin]
 git = "https://github.com/tomaka/glutin"

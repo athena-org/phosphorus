@@ -15,9 +15,9 @@
 use std;
 use cgmath;
 use cgmath::FixedArray;
-use ft;
 use gfx;
 use gfx::traits::*;
+use gfx_text;
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -114,7 +114,8 @@ pub struct RenderHelper<R: gfx::Resources> {
     flat_program: gfx::device::handle::Program<R>,
     textured_program: gfx::device::handle::Program<R>,
     draw_state: gfx::DrawState,
-    sampler: gfx::device::handle::Sampler<R>
+    sampler: gfx::device::handle::Sampler<R>,
+    text_renderer: gfx_text::Renderer<R>
 }
 
 impl<R: gfx::Resources> RenderHelper<R> {
@@ -135,16 +136,15 @@ impl<R: gfx::Resources> RenderHelper<R> {
                 gfx::tex::FilterMethod::Bilinear,
                 gfx::tex::WrapMode::Clamp));
 
-        // Initialize FreeType
-        let library = ft::Library::init().unwrap();
-        let face = library.new_face("examples/assets/Roboto-Regular.ttf", 0).unwrap();
-        face.set_pixel_sizes(0, 13);
+        // Set up our text renderer
+        let mut text_renderer = gfx_text::new(factory).build().unwrap();
 
         RenderHelper {
             flat_program: flat_program,
             textured_program: textured_program,
             draw_state: state,
-            sampler: sampler
+            sampler: sampler,
+            text_renderer: text_renderer
         }
     }
 
@@ -169,10 +169,12 @@ impl<R: gfx::Resources> RenderHelper<R> {
         // TODO: This requires some serious optimization but it will work for now
         for entry in &data.entries {
             match entry {
-                &RenderEntry::Flat(ref data, color) =>
-                    self.render_rect_flat(output, renderer, factory, data, color, &flat_params),
-                &RenderEntry::Textured(ref data, ref texture) =>
-                    self.render_rect_textured(output, renderer, factory, data, texture, &proj)
+                &RenderEntry::Flat(ref rectangle, color) =>
+                    self.render_rect_flat(output, renderer, factory, rectangle, color, &flat_params),
+                &RenderEntry::Textured(ref rectangle, ref texture) =>
+                    self.render_rect_textured(output, renderer, factory, rectangle, texture, &proj),
+                &RenderEntry::Text(ref position, ref string) =>
+                    self.render_text(output, renderer, factory, position, string)
             }
         }
     }
@@ -223,6 +225,22 @@ impl<R: gfx::Resources> RenderHelper<R> {
         let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.textured_program, &textured_params);
         renderer.draw(&batch, output).unwrap();
     }
+
+    fn render_text<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
+        &self,
+        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        position: &[u16;2], text: &String)
+    {
+        // Draw some text 10 pixels down and right from the top left screen corner.
+        /*text.draw(
+            "The quick brown fox jumps over the lazy dog",  // Text to draw
+            [10, 10],                                       // Position
+            [0.65, 0.16, 0.16, 1.0],                        // Text color
+        );*/
+
+        // Render the final batch.
+        //text.draw_end(&mut canvas);
+    }
 }
 
 #[derive(Debug)]
@@ -242,7 +260,8 @@ impl Rectangle {
 
 enum RenderEntry<R: gfx::Resources> {
     Flat(Rectangle, [f32;3]),
-    Textured(Rectangle, gfx::handle::Texture<R>)
+    Textured(Rectangle, gfx::handle::Texture<R>),
+    Text([u16;2], String)
 }
 
 pub struct RenderData<R: gfx::Resources>
@@ -263,5 +282,9 @@ impl<R: gfx::Resources> RenderData<R> {
 
     pub fn push_rect_textured(&mut self, position: [u16;2], size: [u16;2], texture: gfx::handle::Texture<R>) {
         self.entries.push(RenderEntry::Textured(Rectangle::new(position, size), texture));
+    }
+
+    pub fn push_text(&mut self, position: [u16;2], text: String) {
+        self.entries.push(RenderEntry::Text(position, text));
     }
 }
