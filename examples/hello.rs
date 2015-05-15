@@ -26,7 +26,7 @@ fn main() {
     let window = glutin::WindowBuilder::new()
         .with_vsync()
         .with_dimensions(600, 500)
-        .with_title(String::from("Hello"))
+        .with_title(String::from("Phosphorus Widgets"))
         .build_strict().unwrap();
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
     canvas.output.set_gamma(gfx::Gamma::Original).unwrap();
@@ -59,6 +59,8 @@ fn main() {
                 _ => (),
             }
         }
+
+        canvas.clear(gfx::ClearData {color: [1.0, 1.0, 1.0, 1.0], depth: 1.0, stencil: 0});
 
         {
             // Render our actual GUI
