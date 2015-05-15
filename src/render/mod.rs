@@ -18,6 +18,7 @@ use cgmath::FixedArray;
 use gfx;
 use gfx::traits::*;
 use gfx_text;
+use widget;
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -49,16 +50,16 @@ static FLAT_FRAGMENT_SRC: &'static [u8] = b"
 #[derive(Clone, Copy)]
 struct FlatVertex {
     #[name = "i_Pos"]
-    pos: [u16;2],
+    pos: [u16; 2],
 
     #[name = "i_Color"]
-    color: [f32;3],
+    color: [f32; 3],
 }
 
 #[shader_param]
 struct FlatParams<R: gfx::Resources> {
     #[name = "u_Transform"]
-    transform: [[f32;4];4],
+    transform: [[f32; 4]; 4],
 
     _dummy: std::marker::PhantomData<R>
 }
@@ -95,16 +96,16 @@ static TEXTURED_FRAGMENT_SRC: &'static [u8] = b"
 #[derive(Clone, Copy)]
 struct TexturedVertex {
     #[name = "i_Pos"]
-    pos: [u16;2],
+    pos: [u16; 2],
 
     #[name = "i_TexCoord"]
-    tex_coord: [f32;2]
+    tex_coord: [f32; 2]
 }
 
 #[shader_param]
 struct TexturedParams<R: gfx::Resources> {
     #[name = "u_Transform"]
-    transform: [[f32;4];4],
+    transform: [[f32; 4]; 4],
 
     #[name = "u_Texture"]
     texture: gfx::shade::TextureParam<R>
@@ -137,7 +138,10 @@ impl<R: gfx::Resources> RenderHelper<R> {
                 gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
-        let text_renderer = gfx_text::new(factory).with_size(13).build().unwrap();
+        let text_renderer = gfx_text::new(factory)
+            .with_size(13)
+            .with_font("examples/assets/Roboto-Regular.ttf")
+            .build().unwrap();
 
         RenderHelper {
             flat_program: flat_program,
@@ -148,18 +152,14 @@ impl<R: gfx::Resources> RenderHelper<R> {
         }
     }
 
-    pub fn render<
-        O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>,
-        F: gfx::Factory<R>
-    >(
+    pub fn render<F: gfx::Factory<R>, S: Stream<R>>(
         &mut self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
-        data: RenderData<R>)
+        factory: &mut F, stream: &mut S,
+        data: RenderData<R>,
+        area: &widget::RenderArea)
     {
         // Prepare shared uniform data that never has to change
-        let (x, y) = output.get_size();
-        let proj = cgmath::ortho::<f32>(0.0, x as f32, y as f32, 0.0, 1.0, -1.0).into_fixed();
+        let proj = cgmath::ortho::<f32>(0.0, area.size[0] as f32, area.size[1] as f32, 0.0, 1.0, -1.0).into_fixed();
         let flat_params = FlatParams::<R> {
             transform: proj.clone(),
             _dummy: std::marker::PhantomData
@@ -170,21 +170,19 @@ impl<R: gfx::Resources> RenderHelper<R> {
         for entry in &data.entries {
             match entry {
                 &RenderEntry::Flat(ref rectangle, color) =>
-                    self.render_rect_flat(output, renderer, factory, rectangle, color, &flat_params),
+                    self.render_rect_flat(factory, stream, rectangle, color, &flat_params),
                 &RenderEntry::Textured(ref rectangle, ref texture) =>
-                    self.render_rect_textured(output, renderer, factory, rectangle, texture, &proj),
+                    self.render_rect_textured(factory, stream, rectangle, texture, &proj),
                 &RenderEntry::Text(ref position, ref string) => {
-                    let position: [i32; 2] = [position[0] as i32, position[1] as i32];
-                    let mut stream = (renderer as &mut gfx::Renderer<R, C>, output as &O);
-                    self.render_text(factory, &mut stream, position, string);
+                    self.render_text(factory, stream, *position, string, &proj);
                 }
             }
         }
     }
 
-    fn render_rect_flat<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
+    fn render_rect_flat<F: gfx::Factory<R>, S: Stream<R>>(
         &self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        factory: &mut F, stream: &mut S,
         rect: &Rectangle, color: [f32;3], params: &FlatParams<R>)
     {
         // Create a mesh from the rectangle
@@ -200,12 +198,12 @@ impl<R: gfx::Resources> RenderHelper<R> {
         // Actually render that mesh
         let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
         let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.flat_program, params);
-        renderer.draw(&batch, output).unwrap();
+        stream.draw(&batch).unwrap();
     }
 
-    fn render_rect_textured<O: gfx::Output<R>, C: gfx::CommandBuffer<R>, F: gfx::Factory<R>>(
+    fn render_rect_textured<F: gfx::Factory<R>, S: Stream<R>>(
         &self,
-        output: &mut O, renderer: &mut gfx::Renderer<R, C>, factory: &mut F,
+        factory: &mut F, stream: &mut S,
         rect: &Rectangle, texture: &gfx::handle::Texture<R>, proj: &[[f32;4];4])
     {
         let textured_params = TexturedParams::<R> {
@@ -226,20 +224,21 @@ impl<R: gfx::Resources> RenderHelper<R> {
         // Actually render that mesh
         let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
         let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.textured_program, &textured_params);
-        renderer.draw(&batch, output).unwrap();
+        stream.draw(&batch).unwrap();
     }
 
     fn render_text<F: gfx::Factory<R>, S: Stream<R>>(
         &mut self,
         factory: &mut F, stream: &mut S,
-        position: [i32; 2], text: &String)
+        position: [i32; 2], text: &String,
+        proj: &[[f32; 4]; 4])
     {
         self.text_renderer.draw(
             text,
             position,
             [1.0, 1.0, 1.0, 1.0],
         );
-        self.text_renderer.sdraw_end(factory, stream).unwrap();
+        self.text_renderer.sdraw_end_at(factory, stream, proj.clone()).unwrap();
     }
 }
 
@@ -261,7 +260,7 @@ impl Rectangle {
 enum RenderEntry<R: gfx::Resources> {
     Flat(Rectangle, [f32;3]),
     Textured(Rectangle, gfx::handle::Texture<R>),
-    Text([u16;2], String)
+    Text([i32; 2], String)
 }
 
 pub struct RenderData<R: gfx::Resources>
@@ -276,15 +275,15 @@ impl<R: gfx::Resources> RenderData<R> {
         }
     }
 
-    pub fn push_rect_flat(&mut self, position: [u16;2], size: [u16;2], color: [f32;3]) {
+    pub fn push_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]) {
         self.entries.push(RenderEntry::Flat(Rectangle::new(position, size), color));
     }
 
-    pub fn push_rect_textured(&mut self, position: [u16;2], size: [u16;2], texture: gfx::handle::Texture<R>) {
+    pub fn push_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>) {
         self.entries.push(RenderEntry::Textured(Rectangle::new(position, size), texture));
     }
 
-    pub fn push_text(&mut self, position: [u16;2], text: String) {
+    pub fn push_text(&mut self, position: [i32; 2], text: String) {
         self.entries.push(RenderEntry::Text(position, text));
     }
 }

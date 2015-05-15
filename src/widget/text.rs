@@ -53,8 +53,11 @@ impl<R: gfx::Resources> widget::Widget<R> for TextWidget<R> {
         &self, data: &mut render::RenderData<R>,
         prev_area: &widget::RenderArea, offset: &mut widget::RenderOffset)
     {
-        let pos = [prev_area.position[0] + offset.position[0] + 1, prev_area.position[1] + offset.position[1] + 1];
-        let size = [(self.text.len()*20) as u16, 18];
+        // TODO: Actually get width based on the width of the result
+        let pos = [
+            (prev_area.position[0] + offset.position[0]) as i32,
+            (prev_area.position[1] + offset.position[1]) as i32];
+        let size = [(self.text.len()*18) as u16, 18];
 
         // Render the actual text
         data.push_text(pos, self.text.clone());

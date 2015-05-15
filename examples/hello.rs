@@ -60,8 +60,11 @@ fn main() {
             }
         }
 
-        // Render our actual GUI
-        gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
+        {
+            // Render our actual GUI
+            let mut stream = (&mut canvas.renderer, &canvas.output);
+            gui.render(&mut canvas.factory, &mut stream);
+        }
 
         // Show the rendered to buffer on the screen
         canvas.present();

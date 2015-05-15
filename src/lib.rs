@@ -41,21 +41,15 @@ impl<R: gfx::Resources> Gui<R> {
         }
     }
 
-    pub fn render<
-        O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>,
-        F: gfx::Factory<R>
-    >(
+    pub fn render<F: gfx::Factory<R>, S: gfx::Stream<R>>(
         &mut self,
-        output: &mut O,
-        renderer: &mut gfx::Renderer<R, C>,
-        factory: &mut F)
+        factory: &mut F, stream: &mut S)
     {
         // Create our render data struct
         let mut data = render::RenderData::new();
 
         // Set up a layout area to the whole screen
-        let (x, y) = output.get_size();
+        let (x, y) = stream.get_output().get_size();
         let area = widget::RenderArea {
             position: [0, 0],
             size: [x, y]
@@ -65,6 +59,6 @@ impl<R: gfx::Resources> Gui<R> {
         self.root.render(&mut data, &area);
 
         // Finally, render the data we've gathered
-        self.render_helper.render(output, renderer, factory, data);
+        self.render_helper.render(factory, stream, data, &area);
     }
 }
