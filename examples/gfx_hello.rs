@@ -19,7 +19,7 @@ extern crate gfx_window_glutin;
 
 use gfx::traits::*;
 
-static HELLO_MARKUP: &'static str = include_str!("hello-markup.jade");
+static HELLO_MARKUP: &'static str = include_str!("assets/hello-markup.jade");
 
 fn main() {
     // Set up our window
