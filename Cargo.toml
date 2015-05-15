@@ -30,8 +30,7 @@ git = "https://github.com/gfx-rs/gfx_macros"
 plugin = true
 
 [dependencies.gfx_text]
-git = "https://github.com/Kagami/gfx_text"
-branch = "stream-api"
+git = "https://github.com/PistonDevelopers/gfx_text"
 
 [dependencies.piston-gfx_texture]
 git = "https://github.com/PistonDevelopers/gfx_texture"

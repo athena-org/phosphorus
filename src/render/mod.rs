@@ -238,7 +238,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
             position,
             [1.0, 1.0, 1.0, 1.0],
         );
-        self.text_renderer.sdraw_end_at(factory, stream, proj.clone()).unwrap();
+        self.text_renderer.draw_end_at(factory, stream, proj.clone()).unwrap();
     }
 }
 
