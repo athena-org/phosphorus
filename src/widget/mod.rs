@@ -12,6 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod layout;
+use gfx;
+use render;
 
-pub use widgets::layout::*;
+mod image;
+mod layout;
+mod text;
+
+pub use widget::image::*;
+pub use widget::layout::*;
+pub use widget::text::*;
+
+/// An interface for referencing to any kind of widget.
+pub trait Widget<R: gfx::Resources> {
+    /// Writes rendering data for this widget to `data`.
+    fn render(
+        &self, data: &mut render::RenderData<R>,
+        prev_area: &render::RenderArea, offset: &mut render::RenderOffset);
+}

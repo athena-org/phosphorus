@@ -12,49 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(plugin, custom_attribute)]
-#![plugin(gfx_macros)]
-
-extern crate gfx;
 extern crate cgmath;
+#[macro_use]
+extern crate gfx;
+extern crate gfx_text;
+extern crate gfx_texture;
 
 use gfx::traits::*;
 
 mod render;
-pub mod widgets;
+pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {
-    root: widgets::LayoutWidget,
+    root: widget::Layout<R>,
     render_helper: render::RenderHelper<R>
 }
 
 impl<R: gfx::Resources> Gui<R> {
-    pub fn root(&self) -> &widgets::LayoutWidget { &self.root }
-    pub fn root_mut(&mut self) -> &mut widgets::LayoutWidget { &mut self.root }
+    pub fn root(&self) -> &widget::Layout<R> { &self.root }
+    pub fn root_mut(&mut self) -> &mut widget::Layout<R> { &mut self.root }
 
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widgets::LayoutWidget) -> Gui<R> {
+    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::Layout<R>) -> Gui<R> {
         Gui {
             root: root,
             render_helper: render::RenderHelper::new(factory)
         }
     }
 
-    pub fn render<
-        O: gfx::Output<R>,
-        C: gfx::CommandBuffer<R>,
-        F: gfx::Factory<R>
-    >(
+    pub fn render<F: gfx::Factory<R>, S: gfx::Stream<R>>(
         &mut self,
-        output: &mut O,
-        renderer: &mut gfx::Renderer<R, C>,
-        factory: &mut F)
+        factory: &mut F, stream: &mut S)
     {
         // Create our render data struct
         let mut data = render::RenderData::new();
 
         // Set up a layout area to the whole screen
-        let (x, y) = output.get_size();
-        let area = widgets::LayoutArea {
+        let (x, y) = stream.get_output().get_size();
+        let area = render::RenderArea {
             position: [0, 0],
             size: [x, y]
         };
@@ -63,6 +57,6 @@ impl<R: gfx::Resources> Gui<R> {
         self.root.render(&mut data, &area);
 
         // Finally, render the data we've gathered
-        self.render_helper.render(output, renderer, factory, data);
+        self.render_helper.render(factory, stream, data, &area);
     }
 }

@@ -19,23 +19,38 @@ extern crate gfx_window_glutin;
 
 use gfx::traits::*;
 
-static HELLO_MARKUP: &'static str = include_str!("hello-markup.jade");
+static HELLO_MARKUP: &'static str = include_str!("assets/hello-markup.jade");
 
 fn main() {
     // Set up our window
     let window = glutin::WindowBuilder::new()
         .with_vsync()
-        .with_dimensions(1280, 720)
-        .with_title(String::from("Hello"))
+        .with_dimensions(600, 500)
+        .with_title(String::from("Phosphorus Widgets"))
         .build_strict().unwrap();
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
+    canvas.output.set_gamma(gfx::Gamma::Original).unwrap();
 
-    // Set up our phosphorus gui
-    let root = phosphorus::widgets::LayoutWidgetBuilder::new()
-        .with_background_color([0.9, 0.3, 0.3])
+    // Set up our Phosphorus UI
+    let root = phosphorus::widget::LayoutBuilder::new()
+        .with_background_color([21, 23, 24])
+        .with_widget(phosphorus::widget::TextBuilder::new()
+            .with_text("Hello World!")
+            .build_boxed())
+        .with_widget(phosphorus::widget::TextBuilder::new()
+            .with_text("Hello again, World!")
+            .build_boxed())
+        .with_widget(phosphorus::widget::ImageBuilder::new()
+            .with_source("./examples/assets/test.png")
+            .with_size([200, 200])
+            .build_boxed(&mut canvas.factory))
+        .with_widget(phosphorus::widget::TextBuilder::new()
+            .with_text("Hello from after the image!")
+            .build_boxed())
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
 
+    // Run our actual UI loop
     'main: loop {
         // Quit when the window is closed
         for event in canvas.output.window.poll_events() {
@@ -45,15 +60,13 @@ fn main() {
             }
         }
 
-        // Clear in so we don't have lingering stuff from the last frame
-        canvas.clear(gfx::ClearData {
-            color: [0.3, 0.3, 0.9, 1.0],
-            depth: 1.0,
-            stencil: 0,
-        });
+        canvas.clear(gfx::ClearData {color: [1.0, 1.0, 1.0, 1.0], depth: 1.0, stencil: 0});
 
-        // Render our actual GUI
-        gui.render(&mut canvas.output, &mut canvas.renderer, &mut canvas.factory);
+        {
+            // Render our actual GUI
+            let mut stream = (&mut canvas.renderer, &canvas.output);
+            gui.render(&mut canvas.factory, &mut stream);
+        }
 
         // Show the rendered to buffer on the screen
         canvas.present();

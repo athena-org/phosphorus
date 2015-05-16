@@ -18,22 +18,38 @@ version = "0.0.1"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
-[dependencies.jade]
-git = "https://github.com/athena-org/jade-rs"
-branch = "develop"
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath-rs"
 
 [dependencies.gfx]
 git = "https://github.com/gfx-rs/gfx-rs"
 
-[dependencies.gfx_macros]
-git = "https://github.com/gfx-rs/gfx_macros"
-plugin = true
+[dependencies.gfx_text]
+git = "https://github.com/PistonDevelopers/gfx_text"
 
-[dependencies.cgmath]
-git = "https://github.com/bjz/cgmath-rs"
+[dependencies.jade]
+git = "https://github.com/athena-org/jade-rs"
+branch = "develop"
+
+[dependencies.piston-gfx_texture]
+git = "https://github.com/PistonDevelopers/gfx_texture"
+
+# Dependencies for Examples
+
+[dev-dependencies.gfx_window_glutin]
+git = "https://github.com/gfx-rs/gfx_window_glutin"
 
 [dev-dependencies.glutin]
 git = "https://github.com/tomaka/glutin"
 
-[dev-dependencies.gfx_window_glutin]
-git = "https://github.com/gfx-rs/gfx_window_glutin"
+[dev-dependencies.piston]
+git = "https://github.com/PistonDevelopers/piston"
+
+[dev-dependencies.piston_window]
+git = "https://github.com/PistonDevelopers/piston_window"
+
+[dev-dependencies.piston2d-opengl_graphics]
+git = "https://github.com/PistonDevelopers/opengl_graphics"
+
+[dev-dependencies.pistoncore-glutin_window]
+git = "https://github.com/pistondevelopers/glutin_window"
