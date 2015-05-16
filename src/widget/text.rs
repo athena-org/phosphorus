@@ -18,22 +18,26 @@ use gfx;
 use widget;
 use render;
 
+/// Object that allows you to build layout widgets.
 pub struct TextWidgetBuilder {
     text: String
 }
 
 impl TextWidgetBuilder {
+    /// Initializes a new `LayoutWidgetBuilder` with default values.
     pub fn new<'a>() -> TextWidgetBuilder {
         TextWidgetBuilder {
             text: String::default()
         }
     }
 
+    /// Requests a specific text content for the widget.
     pub fn with_text(mut self, text: &str) -> TextWidgetBuilder {
         self.text = String::from(text);
         self
     }
 
+    /// Builds the widget.
     pub fn build_boxed<R: gfx::Resources>(self) -> Box<TextWidget<R>> {
         Box::new(TextWidget {
             text: self.text,
@@ -42,6 +46,7 @@ impl TextWidgetBuilder {
     }
 }
 
+/// Represents a widget with a text content.
 pub struct TextWidget<R: gfx::Resources> {
     text: String,
 
@@ -51,7 +56,7 @@ pub struct TextWidget<R: gfx::Resources> {
 impl<R: gfx::Resources> widget::Widget<R> for TextWidget<R> {
     fn render(
         &self, data: &mut render::RenderData<R>,
-        prev_area: &widget::RenderArea, offset: &mut widget::RenderOffset)
+        prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
         // TODO: Actually get width based on the width of the result
         let pos = [

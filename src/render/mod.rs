@@ -93,6 +93,15 @@ gfx_parameters!( TexturedParams/TexturedParamsLink {
     u_Texture@ texture: gfx::shade::TextureParam<R>,
 });
 
+pub struct RenderArea {
+    pub position: [u16;2],
+    pub size: [u16;2]
+}
+
+pub struct RenderOffset {
+    pub position: [u16;2]
+}
+
 pub struct RenderHelper<R: gfx::Resources> {
     flat_program: gfx::device::handle::Program<R>,
     textured_program: gfx::device::handle::Program<R>,
@@ -138,7 +147,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
         &mut self,
         factory: &mut F, stream: &mut S,
         data: RenderData<R>,
-        area: &widget::RenderArea)
+        area: &RenderArea)
     {
         // Prepare shared uniform data that never has to change
         let proj = cgmath::ortho::<f32>(0.0, area.size[0] as f32, area.size[1] as f32, 0.0, 1.0, -1.0).into_fixed();

@@ -20,7 +20,7 @@ extern crate gfx_texture;
 
 use gfx::traits::*;
 
-pub mod render;
+mod render;
 pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {
@@ -48,7 +48,7 @@ impl<R: gfx::Resources> Gui<R> {
 
         // Set up a layout area to the whole screen
         let (x, y) = stream.get_output().get_size();
-        let area = widget::RenderArea {
+        let area = render::RenderArea {
             position: [0, 0],
             size: [x, y]
         };

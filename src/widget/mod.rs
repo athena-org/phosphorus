@@ -23,17 +23,10 @@ pub use widget::image::*;
 pub use widget::layout::*;
 pub use widget::text::*;
 
-pub struct RenderArea {
-    pub position: [u16;2],
-    pub size: [u16;2]
-}
-
-pub struct RenderOffset {
-    pub position: [u16;2]
-}
-
+/// An interface for referencing to any kind of widget.
 pub trait Widget<R: gfx::Resources> {
+    /// Writes rendering data for this widget to `data`.
     fn render(
         &self, data: &mut render::RenderData<R>,
-        prev_area: &RenderArea, offset: &mut RenderOffset);
+        prev_area: &render::RenderArea, offset: &mut render::RenderOffset);
 }

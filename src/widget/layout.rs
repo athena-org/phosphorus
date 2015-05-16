@@ -21,12 +21,14 @@ pub enum LayoutBackground {
     Color([f32;3])
 }
 
+/// Object that allows you to build layout widgets.
 pub struct LayoutWidgetBuilder<R: gfx::Resources> {
     background: LayoutBackground,
     widgets: Vec<Box<widget::Widget<R>>>
 }
 
 impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
+    /// Initializes a new `LayoutWidgetBuilder` with default values.
     pub fn new() -> LayoutWidgetBuilder<R> {
         LayoutWidgetBuilder {
             background: LayoutBackground::None,
@@ -63,12 +65,12 @@ impl<R: gfx::Resources> LayoutWidget<R> {
         self.background = background;
     }
 
-    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &widget::RenderArea)
+    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &render::RenderArea)
     {
         self.render_background(data, prev_area);
 
         // Render all child widgets
-        let mut offset = widget::RenderOffset {position: [0, 0]};
+        let mut offset = render::RenderOffset {position: [0, 0]};
         for widget in &self.widgets {
             widget.render(data, prev_area, &mut offset);
         }
@@ -77,7 +79,7 @@ impl<R: gfx::Resources> LayoutWidget<R> {
     fn render_background(
         &self,
         data: &mut render::RenderData<R>,
-        area: &widget::RenderArea)
+        area: &render::RenderArea)
     {
         match self.background {
             // Different background types render differently
