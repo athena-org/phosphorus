@@ -1,7 +1,7 @@
 language: rust
 rust:
   - nightly
-#  - 1.0.0 Not yet supported, needs "plugin" and "custom_attribute" features
+  - 1.0.0
 script:
   - cargo test -v
   - cargo doc -v

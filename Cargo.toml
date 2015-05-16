@@ -24,10 +24,6 @@ git = "https://github.com/bjz/cgmath-rs"
 [dependencies.gfx]
 git = "https://github.com/gfx-rs/gfx-rs"
 
-[dependencies.gfx_macros]
-git = "https://github.com/gfx-rs/gfx_macros"
-plugin = true
-
 [dependencies.gfx_text]
 git = "https://github.com/PistonDevelopers/gfx_text"
 

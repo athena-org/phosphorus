@@ -46,23 +46,14 @@ static FLAT_FRAGMENT_SRC: &'static [u8] = b"
     }
 ";
 
-#[vertex_format]
-#[derive(Clone, Copy)]
-struct FlatVertex {
-    #[name = "i_Pos"]
-    pos: [u16; 2],
+gfx_vertex!( FlatVertex {
+    i_Pos@ pos: [u16; 2],
+    i_Color@ color: [f32; 3],
+});
 
-    #[name = "i_Color"]
-    color: [f32; 3],
-}
-
-#[shader_param]
-struct FlatParams<R: gfx::Resources> {
-    #[name = "u_Transform"]
-    transform: [[f32; 4]; 4],
-
-    _dummy: std::marker::PhantomData<R>
-}
+gfx_parameters!( FlatParams/FlatParamsLink {
+    u_Transform@ transform: [[f32; 4]; 4],
+});
 
 static TEXTURED_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -92,24 +83,15 @@ static TEXTURED_FRAGMENT_SRC: &'static [u8] = b"
     }
 ";
 
-#[vertex_format]
-#[derive(Clone, Copy)]
-struct TexturedVertex {
-    #[name = "i_Pos"]
-    pos: [u16; 2],
+gfx_vertex!( TexturedVertex {
+    i_Pos@ pos: [u16; 2],
+    i_TexCoord@ tex_coord: [f32; 2],
+});
 
-    #[name = "i_TexCoord"]
-    tex_coord: [f32; 2]
-}
-
-#[shader_param]
-struct TexturedParams<R: gfx::Resources> {
-    #[name = "u_Transform"]
-    transform: [[f32; 4]; 4],
-
-    #[name = "u_Texture"]
-    texture: gfx::shade::TextureParam<R>
-}
+gfx_parameters!( TexturedParams/TexturedParamsLink {
+    u_Transform@ transform: [[f32; 4]; 4],
+    u_Texture@ texture: gfx::shade::TextureParam<R>,
+});
 
 pub struct RenderHelper<R: gfx::Resources> {
     flat_program: gfx::device::handle::Program<R>,
@@ -162,7 +144,7 @@ impl<R: gfx::Resources> RenderHelper<R> {
         let proj = cgmath::ortho::<f32>(0.0, area.size[0] as f32, area.size[1] as f32, 0.0, 1.0, -1.0).into_fixed();
         let flat_params = FlatParams::<R> {
             transform: proj.clone(),
-            _dummy: std::marker::PhantomData
+            _r: std::marker::PhantomData
         };
 
         // Render all rectangles
@@ -208,7 +190,8 @@ impl<R: gfx::Resources> RenderHelper<R> {
     {
         let textured_params = TexturedParams::<R> {
             transform: proj.clone(),
-            texture: (texture.clone(), Some(self.sampler.clone()))
+            texture: (texture.clone(), Some(self.sampler.clone())),
+            _r: std::marker::PhantomData
         };
 
         // Create a mesh from the rectangle

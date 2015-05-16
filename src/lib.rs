@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(plugin, custom_attribute)]
-#![plugin(gfx_macros)]
-
 extern crate cgmath;
+#[macro_use]
 extern crate gfx;
 extern crate gfx_text;
 extern crate gfx_texture;
