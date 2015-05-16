@@ -14,7 +14,7 @@
     limitations under the License.
 -->
 
-# Phosphorus [![Build Status](https://travis-ci.org/athena-org/phosphorus.png?branch=develop)](https://travis-ci.org/gfx-rs/gfx-rs)
+# Phosphorus [![Build Status](https://travis-ci.org/athena-org/phosphorus.png?branch=develop)](https://travis-ci.org/athena-org/phosphorus)
 
 Phosphorus is a user interface library written in rust. It is written for use in Athena, but can also be used in [Piston](https://github.com/PistonDevelopers/piston) or standalone. It can be integrated into any application that uses [gfx-rs](https://github.com/gfx-rs/gfx-rs).
 
