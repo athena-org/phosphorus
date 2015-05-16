@@ -18,7 +18,6 @@ use cgmath::FixedArray;
 use gfx;
 use gfx::traits::*;
 use gfx_text;
-use widget;
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core

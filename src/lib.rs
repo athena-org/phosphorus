@@ -24,15 +24,15 @@ mod render;
 pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {
-    root: widget::LayoutWidget<R>,
+    root: widget::Layout<R>,
     render_helper: render::RenderHelper<R>
 }
 
 impl<R: gfx::Resources> Gui<R> {
-    pub fn root(&self) -> &widget::LayoutWidget<R> { &self.root }
-    pub fn root_mut(&mut self) -> &mut widget::LayoutWidget<R> { &mut self.root }
+    pub fn root(&self) -> &widget::Layout<R> { &self.root }
+    pub fn root_mut(&mut self) -> &mut widget::Layout<R> { &mut self.root }
 
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::LayoutWidget<R>) -> Gui<R> {
+    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::Layout<R>) -> Gui<R> {
         Gui {
             root: root,
             render_helper: render::RenderHelper::new(factory)

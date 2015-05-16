@@ -21,7 +21,7 @@ Phosphorus is a user interface library written in rust. It is written for use in
 To use Phosphorus you need to create a `Gui` object, filling it with a layout.
 
 ```Rust
-let root = phosphorus::widget::LayoutWidgetBuilder::new()
+let root = phosphorus::widget::LayoutBuilder::new()
     .with_background_color([21, 23, 24])
     .build();
 let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);

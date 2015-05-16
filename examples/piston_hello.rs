@@ -40,19 +40,19 @@ fn main() {
     // Set up our Phosphorus UI
     let mut gui = {
         let mut canvas = events.canvas.borrow_mut();
-        let root = phosphorus::widget::LayoutWidgetBuilder::new()
+        let root = phosphorus::widget::LayoutBuilder::new()
             .with_background_color([21, 23, 24])
-            .with_widget(phosphorus::widget::TextWidgetBuilder::new()
+            .with_widget(phosphorus::widget::TextBuilder::new()
                 .with_text("Hello World!")
                 .build_boxed())
-            .with_widget(phosphorus::widget::TextWidgetBuilder::new()
+            .with_widget(phosphorus::widget::TextBuilder::new()
                 .with_text("Hello again, World!")
                 .build_boxed())
-            .with_widget(phosphorus::widget::ImageWidgetBuilder::new()
+            .with_widget(phosphorus::widget::ImageBuilder::new()
                 .with_source("./examples/assets/test.png")
                 .with_size([200, 200])
                 .build_boxed(&mut canvas.factory))
-            .with_widget(phosphorus::widget::TextWidgetBuilder::new()
+            .with_widget(phosphorus::widget::TextBuilder::new()
                 .with_text("Hello from after the image!")
                 .build_boxed())
             .build();

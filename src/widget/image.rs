@@ -18,52 +18,52 @@ use gfx_texture;
 use widget;
 use render;
 
-pub struct ImageWidgetBuilder {
+pub struct ImageBuilder {
     image_source: String,
     size: [u16;2]
 }
 
-impl Default for ImageWidgetBuilder {
-    fn default() -> ImageWidgetBuilder {
-        ImageWidgetBuilder {
+impl Default for ImageBuilder {
+    fn default() -> ImageBuilder {
+        ImageBuilder {
             image_source: String::default(),
             size: [0, 0]
         }
     }
 }
 
-impl ImageWidgetBuilder {
-    pub fn new() -> ImageWidgetBuilder {
-        ImageWidgetBuilder::default()
+impl ImageBuilder {
+    pub fn new() -> ImageBuilder {
+        ImageBuilder::default()
     }
 
-    pub fn with_source(mut self, source: &str) -> ImageWidgetBuilder {
+    pub fn with_source(mut self, source: &str) -> ImageBuilder {
         self.image_source = String::from(source);
         self
     }
 
-    pub fn with_size(mut self, size: [u16;2]) -> ImageWidgetBuilder {
+    pub fn with_size(mut self, size: [u16;2]) -> ImageBuilder {
         self.size = size;
         self
     }
 
-    pub fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<ImageWidget<R>> {
+    pub fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<Image<R>> {
         let settings = gfx_texture::Settings::new();
         let tex = gfx_texture::Texture::from_path(factory, self.image_source, &settings).unwrap();
 
-        Box::new(ImageWidget {
+        Box::new(Image {
             texture: tex,
             size: self.size
         })
     }
 }
 
-pub struct ImageWidget<R: gfx::Resources> {
+pub struct Image<R: gfx::Resources> {
     texture: gfx_texture::Texture<R>,
     size: [u16;2]
 }
 
-impl<R: gfx::Resources> widget::Widget<R> for ImageWidget<R> {
+impl<R: gfx::Resources> widget::Widget<R> for Image<R> {
     fn render(
         &self, data: &mut render::RenderData<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)

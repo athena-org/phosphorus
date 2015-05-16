@@ -22,45 +22,45 @@ pub enum LayoutBackground {
 }
 
 /// Object that allows you to build layout widgets.
-pub struct LayoutWidgetBuilder<R: gfx::Resources> {
+pub struct LayoutBuilder<R: gfx::Resources> {
     background: LayoutBackground,
     widgets: Vec<Box<widget::Widget<R>>>
 }
 
-impl<R: gfx::Resources> LayoutWidgetBuilder<R> {
-    /// Initializes a new `LayoutWidgetBuilder` with default values.
-    pub fn new() -> LayoutWidgetBuilder<R> {
-        LayoutWidgetBuilder {
+impl<R: gfx::Resources> LayoutBuilder<R> {
+    /// Initializes a new `LayoutBuilder` with default values.
+    pub fn new() -> LayoutBuilder<R> {
+        LayoutBuilder {
             background: LayoutBackground::None,
             widgets: Vec::new()
         }
     }
 
-    pub fn with_background_color(mut self, color: [u8;3]) -> LayoutWidgetBuilder<R> {
+    pub fn with_background_color(mut self, color: [u8;3]) -> LayoutBuilder<R> {
         let rgb = [(color[0] as f32)/255.0, (color[1] as f32)/255.0, (color[2] as f32)/255.0];
         self.background = LayoutBackground::Color(rgb);
         self
     }
 
-    pub fn with_widget(mut self, widget: Box<widget::Widget<R>>) -> LayoutWidgetBuilder<R> {
+    pub fn with_widget(mut self, widget: Box<widget::Widget<R>>) -> LayoutBuilder<R> {
         self.widgets.push(widget);
         self
     }
 
-    pub fn build(self) -> LayoutWidget<R> {
-        LayoutWidget {
+    pub fn build(self) -> Layout<R> {
+        Layout {
             background: self.background,
             widgets: self.widgets
         }
     }
 }
 
-pub struct LayoutWidget<R: gfx::Resources> {
+pub struct Layout<R: gfx::Resources> {
     background: LayoutBackground,
     widgets: Vec<Box<widget::Widget<R>>>
 }
 
-impl<R: gfx::Resources> LayoutWidget<R> {
+impl<R: gfx::Resources> Layout<R> {
     pub fn set_background(&mut self, background: LayoutBackground) {
         self.background = background;
     }

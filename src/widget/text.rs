@@ -19,27 +19,27 @@ use widget;
 use render;
 
 /// Object that allows you to build layout widgets.
-pub struct TextWidgetBuilder {
+pub struct TextBuilder {
     text: String
 }
 
-impl TextWidgetBuilder {
-    /// Initializes a new `LayoutWidgetBuilder` with default values.
-    pub fn new<'a>() -> TextWidgetBuilder {
-        TextWidgetBuilder {
+impl TextBuilder {
+    /// Initializes a new `LayoutBuilder` with default values.
+    pub fn new<'a>() -> TextBuilder {
+        TextBuilder {
             text: String::default()
         }
     }
 
     /// Requests a specific text content for the widget.
-    pub fn with_text(mut self, text: &str) -> TextWidgetBuilder {
+    pub fn with_text(mut self, text: &str) -> TextBuilder {
         self.text = String::from(text);
         self
     }
 
     /// Builds the widget.
-    pub fn build_boxed<R: gfx::Resources>(self) -> Box<TextWidget<R>> {
-        Box::new(TextWidget {
+    pub fn build_boxed<R: gfx::Resources>(self) -> Box<Text<R>> {
+        Box::new(Text {
             text: self.text,
             _dummy: std::marker::PhantomData
         })
@@ -47,13 +47,13 @@ impl TextWidgetBuilder {
 }
 
 /// Represents a widget with a text content.
-pub struct TextWidget<R: gfx::Resources> {
+pub struct Text<R: gfx::Resources> {
     text: String,
 
     _dummy: std::marker::PhantomData<R>
 }
 
-impl<R: gfx::Resources> widget::Widget<R> for TextWidget<R> {
+impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
     fn render(
         &self, data: &mut render::RenderData<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
