@@ -65,7 +65,7 @@ impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
         let size = [(self.text.len()*18) as u16, 18];
 
         // Render the actual text
-        renderer.render_text(pos, self.text.clone());
+        renderer.render_text(pos, &self.text);
 
         // Increment the rendering offset for the next widget
         offset.position[1] += size[1];
