@@ -65,27 +65,27 @@ impl<R: gfx::Resources> Layout<R> {
         self.background = background;
     }
 
-    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &render::RenderArea)
+    pub fn render(&self, renderer: &mut render::Renderer<R>, prev_area: &render::RenderArea)
     {
-        self.render_background(data, prev_area);
+        self.render_background(renderer, prev_area);
 
         // Render all child widgets
         let mut offset = render::RenderOffset {position: [0, 0]};
         for widget in &self.widgets {
-            widget.render(data, prev_area, &mut offset);
+            widget.render(renderer, prev_area, &mut offset);
         }
     }
 
     fn render_background(
         &self,
-        data: &mut render::RenderData<R>,
+        renderer: &mut render::Renderer<R>,
         area: &render::RenderArea)
     {
         match self.background {
             // Different background types render differently
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                data.push_rect_flat(area.position, area.size, c);
+                renderer.render_rect_flat(area.position, area.size, c);
             }
         }
     }

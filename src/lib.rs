@@ -19,13 +19,15 @@ extern crate gfx_text;
 extern crate gfx_texture;
 
 use gfx::traits::*;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 mod render;
 pub mod widget;
 
 pub struct Gui<R: gfx::Resources> {
     root: widget::Layout<R>,
-    render_helper: render::RenderHelper<R>
+    render_data: Rc<RefCell<render::RenderData<R>>>
 }
 
 impl<R: gfx::Resources> Gui<R> {
@@ -35,7 +37,7 @@ impl<R: gfx::Resources> Gui<R> {
     pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::Layout<R>) -> Gui<R> {
         Gui {
             root: root,
-            render_helper: render::RenderHelper::new(factory)
+            render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
         }
     }
 
@@ -43,9 +45,6 @@ impl<R: gfx::Resources> Gui<R> {
         &mut self,
         factory: &mut F, stream: &mut S)
     {
-        // Create our render data struct
-        let mut data = render::RenderData::new();
-
         // Set up a layout area to the whole screen
         let (x, y) = stream.get_output().get_size();
         let area = render::RenderArea {
@@ -54,9 +53,7 @@ impl<R: gfx::Resources> Gui<R> {
         };
 
         // Actually tell the root layout to render to the data
-        self.root.render(&mut data, &area);
-
-        // Finally, render the data we've gathered
-        self.render_helper.render(factory, stream, data, &area);
+        let mut renderer = render::ConcreteRenderer::new(factory, stream, self.render_data.clone(), &area);
+        self.root.render(&mut renderer, &area);
     }
 }

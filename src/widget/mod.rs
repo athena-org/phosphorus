@@ -27,6 +27,6 @@ pub use widget::text::*;
 pub trait Widget<R: gfx::Resources> {
     /// Writes rendering data for this widget to `data`.
     fn render(
-        &self, data: &mut render::RenderData<R>,
+        &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset);
 }

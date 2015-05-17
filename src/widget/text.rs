@@ -55,7 +55,7 @@ pub struct Text<R: gfx::Resources> {
 
 impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
     fn render(
-        &self, data: &mut render::RenderData<R>,
+        &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
         // TODO: Actually get width based on the width of the result
@@ -65,7 +65,7 @@ impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
         let size = [(self.text.len()*18) as u16, 18];
 
         // Render the actual text
-        data.push_text(pos, self.text.clone());
+        renderer.render_text(pos, self.text.clone());
 
         // Increment the rendering offset for the next widget
         offset.position[1] += size[1];

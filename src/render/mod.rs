@@ -18,6 +18,8 @@ use cgmath::FixedArray;
 use gfx;
 use gfx::traits::*;
 use gfx_text;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -101,97 +103,7 @@ pub struct RenderOffset {
     pub position: [u16;2]
 }
 
-pub struct RenderHelper<R: gfx::Resources> {
-    flat_program: gfx::device::handle::Program<R>,
-    textured_program: gfx::device::handle::Program<R>,
-    draw_state: gfx::DrawState,
-    sampler: gfx::device::handle::Sampler<R>,
-    text_renderer: gfx_text::Renderer<R>
-}
-
-impl<R: gfx::Resources> RenderHelper<R> {
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderHelper<R> {
-        // Set up the stuff we'll need to render
-        let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
-            Ok(v) => v,
-            Err(e) => panic!(format!("{:?}", e))
-        };
-        let textured_program = match factory.link_program(TEXTURED_VERTEX_SRC, TEXTURED_FRAGMENT_SRC) {
-            Ok(v) => v,
-            Err(e) => panic!(format!("{:?}", e))
-        };
-
-        let state = gfx::DrawState::new();
-        let sampler = factory.create_sampler(
-            gfx::tex::SamplerInfo::new(
-                gfx::tex::FilterMethod::Bilinear,
-                gfx::tex::WrapMode::Clamp));
-
-        // Set up our text renderer
-        let text_renderer = gfx_text::new(factory)
-            .with_size(13)
-            .with_font("examples/assets/Roboto-Regular.ttf")
-            .build().unwrap();
-
-        RenderHelper {
-            flat_program: flat_program,
-            textured_program: textured_program,
-            draw_state: state,
-            sampler: sampler,
-            text_renderer: text_renderer
-        }
-    }
-
-    pub fn render<F: gfx::Factory<R>, S: Stream<R>>(
-        &mut self,
-        factory: &mut F, stream: &mut S,
-        data: RenderData<R>,
-        area: &RenderArea)
-    {
-        // Prepare shared uniform data that never has to change
-        let proj = cgmath::ortho::<f32>(0.0, area.size[0] as f32, area.size[1] as f32, 0.0, 1.0, -1.0).into_fixed();
-        let flat_params = FlatParams::<R> {
-            transform: proj.clone(),
-            _r: std::marker::PhantomData
-        };
-
-        // Render all rectangles
-        // TODO: This requires some serious optimization but it will work for now
-        for entry in &data.entries {
-            match entry {
-                &RenderEntry::Flat(ref rectangle, color) =>
-                    self.render_rect_flat(factory, stream, rectangle, color, &flat_params),
-                &RenderEntry::Textured(ref rectangle, ref texture) =>
-                    self.render_rect_textured(factory, stream, rectangle, texture, &proj),
-                &RenderEntry::Text(ref position, ref string) => {
-                    self.render_text(factory, stream, *position, string, &proj);
-                }
-            }
-        }
-    }
-
-    fn render_rect_flat<F: gfx::Factory<R>, S: Stream<R>>(
-        &self,
-        factory: &mut F, stream: &mut S,
-        rect: &Rectangle, color: [f32;3], params: &FlatParams<R>)
-    {
-        // Create a mesh from the rectangle
-        let mut vertices = Vec::<FlatVertex>::new();
-        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
-        vertices.push(FlatVertex { pos: [ rect.start[0], rect.start[1] ], color: color });
-        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
-        vertices.push(FlatVertex { pos: [ rect.end[0], rect.end[1] ], color: color });
-        vertices.push(FlatVertex { pos: [ rect.end[0], rect.start[1] ], color: color });
-        vertices.push(FlatVertex { pos: [ rect.start[0], rect.end[1] ], color: color });
-        let mesh = factory.create_mesh(&vertices);
-
-        // Actually render that mesh
-        let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
-        let batch = gfx::batch::bind(&self.draw_state, &mesh, slice.clone(), &self.flat_program, params);
-        stream.draw(&batch).unwrap();
-    }
-
-    fn render_rect_textured<F: gfx::Factory<R>, S: Stream<R>>(
+/*  fn render_rect_textured<F: gfx::Factory<R>, S: Stream<R>>(
         &self,
         factory: &mut F, stream: &mut S,
         rect: &Rectangle, texture: &gfx::handle::Texture<R>, proj: &[[f32;4];4])
@@ -231,50 +143,120 @@ impl<R: gfx::Resources> RenderHelper<R> {
         );
         self.text_renderer.draw_end_at(factory, stream, proj.clone()).unwrap();
     }
-}
+}*/
 
-#[derive(Debug)]
-struct Rectangle {
-    start: [u16;2],
-    end: [u16;2]
-}
+pub struct RenderData<R: gfx::Resources> {
+    draw_state: gfx::DrawState,
+    sampler: gfx::device::handle::Sampler<R>,
 
-impl Rectangle {
-    fn new(position: [u16;2], size: [u16;2]) -> Rectangle {
-        Rectangle {
-            start: [position[0], position[1]],
-            end: [position[0] + size[0], position[1] + size[1]]
-        }
-    }
-}
+    flat_program: gfx::device::handle::Program<R>,
+    textured_program: gfx::device::handle::Program<R>,
 
-enum RenderEntry<R: gfx::Resources> {
-    Flat(Rectangle, [f32;3]),
-    Textured(Rectangle, gfx::handle::Texture<R>),
-    Text([i32; 2], String)
-}
-
-pub struct RenderData<R: gfx::Resources>
-{
-    entries: Vec<RenderEntry<R>>
+    text_renderer: gfx_text::Renderer<R>
 }
 
 impl<R: gfx::Resources> RenderData<R> {
-    pub fn new() -> RenderData<R> {
+    pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderData<R> {
+        // Set up the stuff we'll need to render
+        let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
+            Ok(v) => v,
+            Err(e) => panic!(format!("{:?}", e))
+        };
+        let textured_program = match factory.link_program(TEXTURED_VERTEX_SRC, TEXTURED_FRAGMENT_SRC) {
+            Ok(v) => v,
+            Err(e) => panic!(format!("{:?}", e))
+        };
+
+        let state = gfx::DrawState::new();
+        let sampler = factory.create_sampler(
+            gfx::tex::SamplerInfo::new(
+                gfx::tex::FilterMethod::Bilinear,
+                gfx::tex::WrapMode::Clamp));
+
+        // Set up our text renderer
+        let text_renderer = gfx_text::new(factory)
+            .with_size(13)
+            .with_font("examples/assets/Roboto-Regular.ttf")
+            .build().unwrap();
+
         RenderData {
-            entries: Vec::new()
+            draw_state: state,
+            sampler: sampler,
+
+            flat_program: flat_program,
+            textured_program: textured_program,
+
+            text_renderer: text_renderer
         }
     }
+}
 
-    pub fn push_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]) {
-        self.entries.push(RenderEntry::Flat(Rectangle::new(position, size), color));
+pub trait Renderer<R: gfx::Resources> {
+    fn render_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]);
+    fn render_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>);
+    fn render_text(&mut self, position: [i32; 2], text: String);
+}
+
+pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: 'a + Stream<R>> {
+    render_data: Rc<RefCell<RenderData<R>>>,
+    projection_matrix: [[f32; 4]; 4],
+
+    factory: &'a mut F,
+    stream: &'a mut S
+}
+
+impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
+    pub fn new(
+        factory: &'a mut F, stream: &'a mut S,
+        render_data: Rc<RefCell<RenderData<R>>>, area: &RenderArea
+    )-> ConcreteRenderer<'a, R, F, S> {
+        // Prepare shared uniform data that never has to change
+        let proj = cgmath::ortho::<f32>(
+            0.0, area.size[0] as f32,
+            area.size[1] as f32, 0.0,
+            1.0, -1.0).into_fixed();
+
+        ConcreteRenderer {
+            render_data: render_data,
+            projection_matrix: proj,
+
+            factory: factory,
+            stream: stream
+        }
+    }
+}
+
+impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for ConcreteRenderer<'a, R, F, S> {
+    fn render_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]) {
+        // Set up the uniform data
+        let flat_params = FlatParams::<R> {
+            transform: self.projection_matrix.clone(),
+            _r: std::marker::PhantomData
+        };
+
+        let start = [position[0], position[1]];
+        let end = [position[0] + size[0], position[1] + size[1]];
+
+        // Create a mesh from the rectangle
+        let mut vertices = Vec::<FlatVertex>::new();
+        vertices.push(FlatVertex { pos: [ end[0], start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ start[0], start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ start[0], end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ end[0], end[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ end[0], start[1] ], color: color });
+        vertices.push(FlatVertex { pos: [ start[0], end[1] ], color: color });
+        let mesh = self.factory.create_mesh(&vertices);
+        let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
+
+        // Actually render that mesh
+        let render_data = &self.render_data.borrow();
+        let batch = gfx::batch::bind(&render_data.draw_state, &mesh, slice.clone(), &render_data.flat_program, &flat_params);
+        self.stream.draw(&batch).unwrap();
     }
 
-    pub fn push_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>) {
-        self.entries.push(RenderEntry::Textured(Rectangle::new(position, size), texture));
+    fn render_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>) {
     }
 
-    pub fn push_text(&mut self, position: [i32; 2], text: String) {
-        self.entries.push(RenderEntry::Text(position, text));
+    fn render_text(&mut self, position: [i32; 2], text: String) {
     }
 }

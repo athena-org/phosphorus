@@ -65,11 +65,11 @@ pub struct Image<R: gfx::Resources> {
 
 impl<R: gfx::Resources> widget::Widget<R> for Image<R> {
     fn render(
-        &self, data: &mut render::RenderData<R>,
+        &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
-        data.push_rect_textured(pos, self.size, self.texture.handle());
+        renderer.render_rect_textured(pos, self.size, self.texture.handle());
 
         // Increment the rendering offset for the next widget
         offset.position[1] += self.size[1];
