@@ -95,12 +95,12 @@ gfx_parameters!( TexturedParams/TexturedParamsLink {
 });
 
 pub struct RenderArea {
-    pub position: [u16;2],
-    pub size: [u16;2]
+    pub position: [i32; 2],
+    pub size: [i32; 2]
 }
 
 pub struct RenderOffset {
-    pub position: [u16;2]
+    pub position: [i32; 2]
 }
 
 pub struct RenderData<R: gfx::Resources> {
@@ -150,8 +150,8 @@ impl<R: gfx::Resources> RenderData<R> {
 }
 
 pub trait Renderer<R: gfx::Resources> {
-    fn render_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]);
-    fn render_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>);
+    fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]);
+    fn render_rect_textured(&mut self, position: [i32; 2], size: [i32; 2], texture: gfx::handle::Texture<R>);
     fn render_text(&mut self, position: [i32; 2], text: &str);
 }
 
@@ -185,7 +185,7 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'
 }
 
 impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for ConcreteRenderer<'a, R, F, S> {
-    fn render_rect_flat(&mut self, position: [u16; 2], size: [u16; 2], color: [f32; 3]) {
+    fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]) {
         let render_data = &self.render_data.borrow();
 
         // Set up the uniform data
@@ -194,8 +194,8 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
             _r: std::marker::PhantomData
         };
 
-        let start = [position[0], position[1]];
-        let end = [position[0] + size[0], position[1] + size[1]];
+        let start = [position[0] as u16, position[1] as u16];
+        let end = [position[0] as u16 + size[0] as u16, position[1] as u16 + size[1] as u16];
 
         // Create a mesh from the rectangle
         let mut vertices = Vec::<FlatVertex>::new();
@@ -213,7 +213,7 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
         self.stream.draw(&batch).unwrap();
     }
 
-    fn render_rect_textured(&mut self, position: [u16; 2], size: [u16; 2], texture: gfx::handle::Texture<R>) {
+    fn render_rect_textured(&mut self, position: [i32; 2], size: [i32; 2], texture: gfx::handle::Texture<R>) {
         let render_data = &self.render_data.borrow();
 
         // Set up the uniform data
@@ -223,8 +223,8 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
             _r: std::marker::PhantomData
         };
 
-        let start = [position[0], position[1]];
-        let end = [position[0] + size[0], position[1] + size[1]];
+        let start = [position[0] as u16, position[1] as u16];
+        let end = [position[0] as u16 + size[0] as u16, position[1] as u16 + size[1] as u16];
 
         // Create a mesh from the rectangle
         let mut vertices = Vec::<TexturedVertex>::new();

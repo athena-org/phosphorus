@@ -49,7 +49,7 @@ impl<R: gfx::Resources> Gui<R> {
         let (x, y) = stream.get_output().get_size();
         let area = render::RenderArea {
             position: [0, 0],
-            size: [x, y]
+            size: [x as i32, y as i32]
         };
 
         // Actually tell the root layout to render to the data

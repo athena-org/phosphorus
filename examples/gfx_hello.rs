@@ -18,8 +18,9 @@ extern crate gfx;
 extern crate gfx_window_glutin;
 
 use gfx::traits::*;
+use phosphorus::widget::*;
 
-static HELLO_MARKUP: &'static str = include_str!("assets/hello-markup.jade");
+//static HELLO_MARKUP: &'static str = include_str!("assets/hello-markup.jade");
 
 fn main() {
     // Set up our window
@@ -29,7 +30,6 @@ fn main() {
         .with_title(String::from("Phosphorus Widgets"))
         .build_strict().unwrap();
     let mut canvas = gfx_window_glutin::init(window).into_canvas();
-    canvas.output.set_gamma(gfx::Gamma::Original).unwrap();
 
     // Set up our Phosphorus UI
     let root = phosphorus::widget::LayoutBuilder::new()
@@ -46,6 +46,9 @@ fn main() {
             .build_boxed(&mut canvas.factory))
         .with_widget(phosphorus::widget::TextBuilder::new()
             .with_text("Hello from after the image!")
+            .build_boxed())
+        .with_widget(phosphorus::widget::ButtonBuilder::new()
+            .with_text("Click me?")
             .build_boxed())
         .build();
     let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);

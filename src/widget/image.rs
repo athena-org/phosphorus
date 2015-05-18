@@ -20,7 +20,7 @@ use render;
 
 pub struct ImageBuilder {
     image_source: String,
-    size: [u16;2]
+    size: [i32; 2]
 }
 
 impl Default for ImageBuilder {
@@ -42,7 +42,7 @@ impl ImageBuilder {
         self
     }
 
-    pub fn with_size(mut self, size: [u16;2]) -> ImageBuilder {
+    pub fn with_size(mut self, size: [i32; 2]) -> ImageBuilder {
         self.size = size;
         self
     }
@@ -60,7 +60,7 @@ impl ImageBuilder {
 
 pub struct Image<R: gfx::Resources> {
     texture: gfx_texture::Texture<R>,
-    size: [u16;2]
+    size: [i32;2]
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Image<R> {

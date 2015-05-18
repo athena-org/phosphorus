@@ -13,61 +13,58 @@
 // limitations under the License.
 
 use std;
-use std::default::Default;
 use gfx;
 use widget;
 use render;
 
-/// Object that allows you to build text widgets.
-pub struct TextBuilder {
-    text: String
+/// Object that allows you to build button widgets.
+pub struct ButtonBuilder {
+    text: String,
+    size: [i32; 2]
 }
 
-impl TextBuilder {
-    /// Initializes a new `TextBuilder` with default values.
-    pub fn new() -> TextBuilder {
-        TextBuilder {
-            text: String::default()
+impl ButtonBuilder {
+    /// Initializes a new `ButtonBuilder` with default values.
+    pub fn new() -> ButtonBuilder {
+        ButtonBuilder {
+            text: String::default(),
+            size: [80, 20]
         }
     }
 
     /// Requests a specific text content for the widget.
-    pub fn with_text(mut self, text: &str) -> TextBuilder {
+    pub fn with_text(mut self, text: &str) -> ButtonBuilder {
         self.text = String::from(text);
         self
     }
 
     /// Builds the widget.
-    pub fn build_boxed<R: gfx::Resources>(self) -> Box<Text<R>> {
-        Box::new(Text {
+    pub fn build_boxed<R: gfx::Resources>(self) -> Box<Button<R>> {
+        Box::new(Button {
             text: self.text,
+            size: self.size,
             _r: std::marker::PhantomData
         })
     }
 }
 
-/// Represents a widget with a text content.
-pub struct Text<R: gfx::Resources> {
+pub struct Button<R: gfx::Resources> {
     text: String,
+    size: [i32; 2],
 
     _r: std::marker::PhantomData<R>
 }
 
-impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
+impl<R: gfx::Resources> widget::Widget<R> for Button<R> {
     fn render(
         &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
-        // TODO: Actually get width based on the width of the result
         let pos = [
             (prev_area.position[0] + offset.position[0]),
             (prev_area.position[1] + offset.position[1])];
-        let size = [(self.text.len()*18) as i32, 18];
 
-        // Render the actual text
-        renderer.render_text(pos, &self.text);
-
-        // Increment the rendering offset for the next widget
-        offset.position[1] += size[1];
+        renderer.render_rect_flat(pos, self.size, [0.29, 0.29, 0.29]); // Highlighted: 0.33
+        renderer.render_text([pos[0] + 4, pos[1] + 1], "Test");
     }
 }

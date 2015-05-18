@@ -15,10 +15,12 @@
 use gfx;
 use render;
 
+mod button;
 mod image;
 mod layout;
 mod text;
 
+pub use widget::button::*;
 pub use widget::image::*;
 pub use widget::layout::*;
 pub use widget::text::*;

@@ -18,7 +18,7 @@ use render;
 
 pub enum LayoutBackground {
     None,
-    Color([f32;3])
+    Color([f32; 3])
 }
 
 /// Object that allows you to build layout widgets.
@@ -36,7 +36,7 @@ impl<R: gfx::Resources> LayoutBuilder<R> {
         }
     }
 
-    pub fn with_background_color(mut self, color: [u8;3]) -> LayoutBuilder<R> {
+    pub fn with_background_color(mut self, color: [u8; 3]) -> LayoutBuilder<R> {
         let rgb = [(color[0] as f32)/255.0, (color[1] as f32)/255.0, (color[2] as f32)/255.0];
         self.background = LayoutBackground::Color(rgb);
         self
