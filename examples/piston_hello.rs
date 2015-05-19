@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate gfx;
+/*extern crate gfx;
 extern crate glutin_window;
 extern crate opengl_graphics;
 extern crate piston;
@@ -72,4 +72,4 @@ fn main() {
             // Update Here
         }
     }
-}
+}*/

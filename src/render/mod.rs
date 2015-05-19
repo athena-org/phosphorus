@@ -52,7 +52,7 @@ gfx_vertex!( FlatVertex {
     i_Color@ color: [f32; 3],
 });
 
-gfx_parameters!( FlatParams/FlatParamsLink {
+gfx_parameters!( FlatParams {
     u_Transform@ transform: [[f32; 4]; 4],
 });
 
@@ -89,7 +89,7 @@ gfx_vertex!( TexturedVertex {
     i_TexCoord@ tex_coord: [f32; 2],
 });
 
-gfx_parameters!( TexturedParams/TexturedParamsLink {
+gfx_parameters!( TexturedParams {
     u_Transform@ transform: [[f32; 4]; 4],
     u_Texture@ texture: gfx::shade::TextureParam<R>,
 });

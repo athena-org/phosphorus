@@ -42,14 +42,14 @@ git = "https://github.com/gfx-rs/gfx_window_glutin"
 [dev-dependencies.glutin]
 git = "https://github.com/tomaka/glutin"
 
-[dev-dependencies.piston]
-git = "https://github.com/PistonDevelopers/piston"
+# [dev-dependencies.piston]
+# git = "https://github.com/PistonDevelopers/piston"
 
-[dev-dependencies.piston_window]
-git = "https://github.com/PistonDevelopers/piston_window"
+# [dev-dependencies.piston_window]
+# git = "https://github.com/PistonDevelopers/piston_window"
 
-[dev-dependencies.piston2d-opengl_graphics]
-git = "https://github.com/PistonDevelopers/opengl_graphics"
+# [dev-dependencies.piston2d-opengl_graphics]
+# git = "https://github.com/PistonDevelopers/opengl_graphics"
 
-[dev-dependencies.pistoncore-glutin_window]
-git = "https://github.com/pistondevelopers/glutin_window"
+# [dev-dependencies.pistoncore-glutin_window]
+# git = "https://github.com/pistondevelopers/glutin_window"
