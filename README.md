@@ -24,7 +24,7 @@ To use Phosphorus you need to create a `Gui` object, filling it with a layout.
 let root = phosphorus::widget::LayoutBuilder::new()
     .with_background_color([21, 23, 24])
     .build();
-let mut gui = phosphorus::Gui::new(&mut canvas.factory, root);
+let mut gui = phosphorus::Gui::new(&mut canvas.factory, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
 ```
 
 Then you can render it using a gfx `Factory` and `Stream` combination.
