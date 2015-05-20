@@ -27,6 +27,7 @@ pub mod widget;
 
 pub enum Event {
     MouseMoved([i32; 2]),
+    MouseClick,
     Placeholder
 }
 

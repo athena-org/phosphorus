@@ -21,7 +21,8 @@ use Event;
 /// Object that allows you to build button widgets.
 pub struct ButtonBuilder {
     text: String,
-    size: [i32; 2]
+    size: [i32; 2],
+    callback: Option<Box<Fn()>>
 }
 
 impl ButtonBuilder {
@@ -29,7 +30,8 @@ impl ButtonBuilder {
     pub fn new() -> ButtonBuilder {
         ButtonBuilder {
             text: String::default(),
-            size: [80, 20]
+            size: [80, 20],
+            callback: None
         }
     }
 
@@ -39,11 +41,18 @@ impl ButtonBuilder {
         self
     }
 
+    // Requests a callback to be called on click.
+    pub fn with_callback(mut self, callback: Box<Fn()>) -> ButtonBuilder {
+        self.callback = Some(callback);
+        self
+    }
+
     /// Builds the widget.
     pub fn build_boxed<R: gfx::Resources>(self) -> Box<Button<R>> {
         Box::new(Button {
             text: self.text,
             size: self.size,
+            callback: self.callback,
 
             hovering: false,
 
@@ -55,6 +64,7 @@ impl ButtonBuilder {
 pub struct Button<R: gfx::Resources> {
     text: String,
     size: [i32; 2],
+    callback: Option<Box<Fn()>>,
 
     hovering: bool,
 
@@ -66,14 +76,24 @@ impl<R: gfx::Resources> widget::Widget<R> for Button<R> {
         &mut self, event: &Event,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
-        if let &Event::MouseMoved(mouse_pos) = event {
-            let pos = [
-                (prev_area.position[0] + offset.position[0]),
-                (prev_area.position[1] + offset.position[1])];
+        match event {
+            &Event::MouseMoved(mouse_pos) => {
+                let pos = [
+                    (prev_area.position[0] + offset.position[0]),
+                    (prev_area.position[1] + offset.position[1])];
 
-            self.hovering = (
-                mouse_pos[0] > pos[0] && mouse_pos[1] > pos[1] &&
-                mouse_pos[0] <= pos[0] + self.size[0] && mouse_pos[1] <= pos[1] + self.size[1]);
+                self.hovering =
+                    mouse_pos[0] > pos[0] && mouse_pos[1] > pos[1] &&
+                    mouse_pos[0] <= pos[0] + self.size[0] && mouse_pos[1] <= pos[1] + self.size[1];
+            },
+            &Event::MouseClick => {
+                if self.hovering {
+                    if let &Some(ref c) = &self.callback {
+                        c();
+                    }
+                }
+            },
+            _ => {}
         }
 
         // Increment the rendering offset for the next widget
@@ -88,7 +108,7 @@ impl<R: gfx::Resources> widget::Widget<R> for Button<R> {
             (prev_area.position[0] + offset.position[0]),
             (prev_area.position[1] + offset.position[1])];
 
-        renderer.render_rect_flat(pos, self.size, if self.hovering {[0.33, 0.33, 0.33]} else {[0.29, 0.29, 0.29]});
+        renderer.render_rect_flat(pos, self.size, if self.hovering {[0.34, 0.34, 0.34]} else {[0.28, 0.28, 0.28]});
         renderer.render_text([pos[0] + 4, pos[1] + 1], &self.text);
 
         // Increment the rendering offset for the next widget

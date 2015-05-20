@@ -52,6 +52,7 @@ fn main() {
             .build_boxed())
         .with_widget(phosphorus::widget::ButtonBuilder::new()
             .with_text("Click me?")
+            .with_callback(Box::new(|| println!("Hello")))
             .build_boxed())
         .build();
     let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
@@ -62,7 +63,10 @@ fn main() {
         for event in stream.out.window.poll_events() {
             match event {
                 glutin::Event::Closed => break 'main,
-                glutin::Event::MouseMoved((x, y)) => gui.raise_event(&stream, phosphorus::Event::MouseMoved([x, y])),
+                glutin::Event::MouseMoved((x, y)) =>
+                    gui.raise_event(&stream, phosphorus::Event::MouseMoved([x, y])),
+                glutin::Event::MouseInput(glutin::ElementState::Released, _) =>
+                    gui.raise_event(&stream, phosphorus::Event::MouseClick),
                 _ => (),
             }
         }
