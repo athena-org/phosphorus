@@ -15,6 +15,7 @@
 use gfx;
 use widget;
 use render;
+use Event;
 
 pub enum LayoutBackground {
     None,
@@ -63,6 +64,13 @@ pub struct Layout<R: gfx::Resources> {
 impl<R: gfx::Resources> Layout<R> {
     pub fn set_background(&mut self, background: LayoutBackground) {
         self.background = background;
+    }
+
+    pub fn raise_event(&mut self, event: &Event, prev_area: &render::RenderArea) {
+        let mut offset = render::RenderOffset {position: [0, 0]};
+        for widget in &mut self.widgets {
+            widget.raise_event(event, prev_area, &mut offset);
+        }
     }
 
     pub fn render(&self, renderer: &mut render::Renderer<R>, prev_area: &render::RenderArea)

@@ -25,6 +25,11 @@ use std::rc::Rc;
 mod render;
 pub mod widget;
 
+pub enum Event {
+    MouseMoved([i32; 2]),
+    Placeholder
+}
+
 pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
     root: widget::Layout<R>,
     render_data: Rc<RefCell<render::RenderData<R, F>>>
@@ -41,6 +46,16 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
             root: root,
             render_data: Rc::new(RefCell::new(render::RenderData::new(device, spawner)))
         }
+    }
+
+    pub fn raise_event<S: gfx::Stream<R>>(&mut self, stream: &S, event: Event) {
+        let (x, y) = stream.get_output().get_size();
+        let area = render::RenderArea {
+            position: [0, 0],
+            size: [x as i32, y as i32]
+        };
+
+        self.root.raise_event(&event, &area);
     }
 
     pub fn render<S: gfx::Stream<R>>(

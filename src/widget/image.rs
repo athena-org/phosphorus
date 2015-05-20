@@ -17,6 +17,7 @@ use gfx;
 use gfx_texture;
 use widget;
 use render;
+use Event;
 
 pub struct ImageBuilder {
     image_source: String,
@@ -64,6 +65,12 @@ pub struct Image<R: gfx::Resources> {
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Image<R> {
+    fn raise_event(&mut self, _: &Event, _: &render::RenderArea, offset: &mut render::RenderOffset) {
+        offset.position[1] += self.size[1];
+
+        // We don't care about events
+    }
+
     fn render(
         &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)

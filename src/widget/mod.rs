@@ -14,6 +14,7 @@
 
 use gfx;
 use render;
+use Event;
 
 mod button;
 mod image;
@@ -27,6 +28,11 @@ pub use widget::text::*;
 
 /// An interface for referencing to any kind of widget.
 pub trait Widget<R: gfx::Resources> {
+    /// Handles an event that may or may not apply to this widget.
+    fn raise_event(
+        &mut self, event: &Event,
+        prev_area: &render::RenderArea, offset: &mut render::RenderOffset);
+
     /// Writes rendering data for this widget to `data`.
     fn render(
         &self, renderer: &mut render::Renderer<R>,

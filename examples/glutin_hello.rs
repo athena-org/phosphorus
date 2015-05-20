@@ -62,6 +62,7 @@ fn main() {
         for event in stream.out.window.poll_events() {
             match event {
                 glutin::Event::Closed => break 'main,
+                glutin::Event::MouseMoved((x, y)) => gui.raise_event(&stream, phosphorus::Event::MouseMoved([x, y])),
                 _ => (),
             }
         }

@@ -17,6 +17,7 @@ use std::default::Default;
 use gfx;
 use widget;
 use render;
+use Event;
 
 /// Object that allows you to build text widgets.
 pub struct TextBuilder {
@@ -54,6 +55,13 @@ pub struct Text<R: gfx::Resources> {
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
+    fn raise_event(&mut self, _: &Event, _: &render::RenderArea, offset: &mut render::RenderOffset) {
+        let size = [(self.text.len()*18) as i32, 18];
+        offset.position[1] += size[1];
+
+        // We don't care about events
+    }
+
     fn render(
         &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)

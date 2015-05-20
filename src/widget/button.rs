@@ -16,6 +16,7 @@ use std;
 use gfx;
 use widget;
 use render;
+use Event;
 
 /// Object that allows you to build button widgets.
 pub struct ButtonBuilder {
@@ -43,6 +44,9 @@ impl ButtonBuilder {
         Box::new(Button {
             text: self.text,
             size: self.size,
+
+            hovering: false,
+
             _r: std::marker::PhantomData
         })
     }
@@ -52,10 +56,30 @@ pub struct Button<R: gfx::Resources> {
     text: String,
     size: [i32; 2],
 
+    hovering: bool,
+
     _r: std::marker::PhantomData<R>
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Button<R> {
+    fn raise_event(
+        &mut self, event: &Event,
+        prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
+    {
+        if let &Event::MouseMoved(mouse_pos) = event {
+            let pos = [
+                (prev_area.position[0] + offset.position[0]),
+                (prev_area.position[1] + offset.position[1])];
+
+            self.hovering = (
+                mouse_pos[0] > pos[0] && mouse_pos[1] > pos[1] &&
+                mouse_pos[0] <= pos[0] + self.size[0] && mouse_pos[1] <= pos[1] + self.size[1]);
+        }
+
+        // Increment the rendering offset for the next widget
+        offset.position[1] += self.size[1];
+    }
+
     fn render(
         &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
@@ -64,7 +88,10 @@ impl<R: gfx::Resources> widget::Widget<R> for Button<R> {
             (prev_area.position[0] + offset.position[0]),
             (prev_area.position[1] + offset.position[1])];
 
-        renderer.render_rect_flat(pos, self.size, [0.29, 0.29, 0.29]); // Highlighted: 0.33
-        renderer.render_text([pos[0] + 4, pos[1] + 1], "Test");
+        renderer.render_rect_flat(pos, self.size, if self.hovering {[0.33, 0.33, 0.33]} else {[0.29, 0.29, 0.29]});
+        renderer.render_text([pos[0] + 4, pos[1] + 1], &self.text);
+
+        // Increment the rendering offset for the next widget
+        offset.position[1] += self.size[1];
     }
 }
