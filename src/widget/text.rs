@@ -17,15 +17,16 @@ use std::default::Default;
 use gfx;
 use widget;
 use render;
+use Event;
 
-/// Object that allows you to build layout widgets.
+/// Object that allows you to build text widgets.
 pub struct TextBuilder {
     text: String
 }
 
 impl TextBuilder {
-    /// Initializes a new `LayoutBuilder` with default values.
-    pub fn new<'a>() -> TextBuilder {
+    /// Initializes a new `TextBuilder` with default values.
+    pub fn new() -> TextBuilder {
         TextBuilder {
             text: String::default()
         }
@@ -41,7 +42,7 @@ impl TextBuilder {
     pub fn build_boxed<R: gfx::Resources>(self) -> Box<Text<R>> {
         Box::new(Text {
             text: self.text,
-            _dummy: std::marker::PhantomData
+            _r: std::marker::PhantomData
         })
     }
 }
@@ -50,22 +51,29 @@ impl TextBuilder {
 pub struct Text<R: gfx::Resources> {
     text: String,
 
-    _dummy: std::marker::PhantomData<R>
+    _r: std::marker::PhantomData<R>
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Text<R> {
+    fn raise_event(&mut self, _: &Event, _: &render::RenderArea, offset: &mut render::RenderOffset) {
+        let size = [(self.text.len()*18) as i32, 18];
+        offset.position[1] += size[1];
+
+        // We don't care about events
+    }
+
     fn render(
-        &self, data: &mut render::RenderData<R>,
+        &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
         // TODO: Actually get width based on the width of the result
         let pos = [
-            (prev_area.position[0] + offset.position[0]) as i32,
-            (prev_area.position[1] + offset.position[1]) as i32];
-        let size = [(self.text.len()*18) as u16, 18];
+            (prev_area.position[0] + offset.position[0]),
+            (prev_area.position[1] + offset.position[1])];
+        let size = [(self.text.len()*18) as i32, 18];
 
         // Render the actual text
-        data.push_text(pos, self.text.clone());
+        renderer.render_text(pos, &self.text);
 
         // Increment the rendering offset for the next widget
         offset.position[1] += size[1];

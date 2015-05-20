@@ -1,7 +1,8 @@
 language: rust
 rust:
+  - stable
   - nightly
-  - 1.0.0
 script:
-  - cargo test -v
-  - cargo doc -v
+  - cargo build -v
+#  - cargo test -v
+#  - cargo doc -v

@@ -17,10 +17,11 @@ use gfx;
 use gfx_texture;
 use widget;
 use render;
+use Event;
 
 pub struct ImageBuilder {
     image_source: String,
-    size: [u16;2]
+    size: [i32; 2]
 }
 
 impl Default for ImageBuilder {
@@ -42,7 +43,7 @@ impl ImageBuilder {
         self
     }
 
-    pub fn with_size(mut self, size: [u16;2]) -> ImageBuilder {
+    pub fn with_size(mut self, size: [i32; 2]) -> ImageBuilder {
         self.size = size;
         self
     }
@@ -60,16 +61,22 @@ impl ImageBuilder {
 
 pub struct Image<R: gfx::Resources> {
     texture: gfx_texture::Texture<R>,
-    size: [u16;2]
+    size: [i32;2]
 }
 
 impl<R: gfx::Resources> widget::Widget<R> for Image<R> {
+    fn raise_event(&mut self, _: &Event, _: &render::RenderArea, offset: &mut render::RenderOffset) {
+        offset.position[1] += self.size[1];
+
+        // We don't care about events
+    }
+
     fn render(
-        &self, data: &mut render::RenderData<R>,
+        &self, renderer: &mut render::Renderer<R>,
         prev_area: &render::RenderArea, offset: &mut render::RenderOffset)
     {
         let pos = [prev_area.position[0] + offset.position[0], prev_area.position[1] + offset.position[1]];
-        data.push_rect_textured(pos, self.size, self.texture.handle());
+        renderer.render_rect_textured(pos, self.size, self.texture.handle());
 
         // Increment the rendering offset for the next widget
         offset.position[1] += self.size[1];

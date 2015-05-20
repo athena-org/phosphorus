@@ -15,10 +15,11 @@
 use gfx;
 use widget;
 use render;
+use Event;
 
 pub enum LayoutBackground {
     None,
-    Color([f32;3])
+    Color([f32; 3])
 }
 
 /// Object that allows you to build layout widgets.
@@ -36,7 +37,7 @@ impl<R: gfx::Resources> LayoutBuilder<R> {
         }
     }
 
-    pub fn with_background_color(mut self, color: [u8;3]) -> LayoutBuilder<R> {
+    pub fn with_background_color(mut self, color: [u8; 3]) -> LayoutBuilder<R> {
         let rgb = [(color[0] as f32)/255.0, (color[1] as f32)/255.0, (color[2] as f32)/255.0];
         self.background = LayoutBackground::Color(rgb);
         self
@@ -65,27 +66,34 @@ impl<R: gfx::Resources> Layout<R> {
         self.background = background;
     }
 
-    pub fn render(&self, data: &mut render::RenderData<R>, prev_area: &render::RenderArea)
+    pub fn raise_event(&mut self, event: &Event, prev_area: &render::RenderArea) {
+        let mut offset = render::RenderOffset {position: [0, 0]};
+        for widget in &mut self.widgets {
+            widget.raise_event(event, prev_area, &mut offset);
+        }
+    }
+
+    pub fn render(&self, renderer: &mut render::Renderer<R>, prev_area: &render::RenderArea)
     {
-        self.render_background(data, prev_area);
+        self.render_background(renderer, prev_area);
 
         // Render all child widgets
         let mut offset = render::RenderOffset {position: [0, 0]};
         for widget in &self.widgets {
-            widget.render(data, prev_area, &mut offset);
+            widget.render(renderer, prev_area, &mut offset);
         }
     }
 
     fn render_background(
         &self,
-        data: &mut render::RenderData<R>,
+        renderer: &mut render::Renderer<R>,
         area: &render::RenderArea)
     {
         match self.background {
             // Different background types render differently
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
-                data.push_rect_flat(area.position, area.size, c);
+                renderer.render_rect_flat(area.position, area.size, c);
             }
         }
     }
