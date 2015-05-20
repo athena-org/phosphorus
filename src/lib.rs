@@ -39,6 +39,7 @@ pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
 impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
     pub fn root(&self) -> &widget::Layout<R> { &self.root }
     pub fn root_mut(&mut self) -> &mut widget::Layout<R> { &mut self.root }
+    pub fn set_root(&mut self, root: widget::Layout<R>) { self.root = root; }
 
     pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, root: widget::Layout<R>, spawner: FactorySpawner) -> Gui<R, F>
         where FactorySpawner: Fn(&mut D) -> F
