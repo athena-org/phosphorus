@@ -36,6 +36,9 @@ git = "https://github.com/PistonDevelopers/gfx_texture"
 
 # Dependencies for Examples
 
+[dev-dependencies.gfx_device_gl]
+git = "https://github.com/gfx-rs/gfx_device_gl"
+
 [dev-dependencies.gfx_window_glutin]
 git = "https://github.com/gfx-rs/gfx_window_glutin"
 

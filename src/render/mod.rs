@@ -103,18 +103,22 @@ pub struct RenderOffset {
     pub position: [i32; 2]
 }
 
-pub struct RenderData<R: gfx::Resources> {
+pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
     draw_state: gfx::DrawState,
     sampler: gfx::device::handle::Sampler<R>,
 
     flat_program: gfx::device::handle::Program<R>,
     textured_program: gfx::device::handle::Program<R>,
 
-    text_renderer: gfx_text::Renderer<R>
+    text_renderer: gfx_text::Renderer<R, F>
 }
 
-impl<R: gfx::Resources> RenderData<R> {
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F) -> RenderData<R> {
+impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
+    pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, spawner: FactorySpawner) -> RenderData<R, F>
+        where FactorySpawner: Fn(&mut D) -> F
+    {
+        let mut factory = spawner(device);
+
         // Set up the stuff we'll need to render
         let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
             Ok(v) => v,
@@ -132,7 +136,7 @@ impl<R: gfx::Resources> RenderData<R> {
                 gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
-        let text_renderer = gfx_text::new(factory)
+        let text_renderer = gfx_text::new(spawner(device))
             .with_size(13)
             .with_font("examples/assets/Roboto-Regular.ttf")
             .build().unwrap();
@@ -156,7 +160,7 @@ pub trait Renderer<R: gfx::Resources> {
 }
 
 pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: 'a + Stream<R>> {
-    render_data: Rc<RefCell<RenderData<R>>>,
+    render_data: Rc<RefCell<RenderData<R, F>>>,
     projection_matrix: [[f32; 4]; 4],
 
     factory: &'a mut F,
@@ -166,7 +170,7 @@ pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: '
 impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
     pub fn new(
         factory: &'a mut F, stream: &'a mut S,
-        render_data: Rc<RefCell<RenderData<R>>>, area: &RenderArea
+        render_data: Rc<RefCell<RenderData<R, F>>>, area: &RenderArea
     )-> ConcreteRenderer<'a, R, F, S> {
         // Prepare shared uniform data that never has to change
         let proj = cgmath::ortho::<f32>(
@@ -249,6 +253,6 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
             position,
             [1.0, 1.0, 1.0, 1.0],
         );
-        render_data.text_renderer.draw_end_at(self.factory, self.stream, self.projection_matrix.clone()).unwrap();
+        render_data.text_renderer.draw_end_at(self.stream, self.projection_matrix.clone()).unwrap();
     }
 }

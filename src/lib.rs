@@ -25,23 +25,25 @@ use std::rc::Rc;
 mod render;
 pub mod widget;
 
-pub struct Gui<R: gfx::Resources> {
+pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
     root: widget::Layout<R>,
-    render_data: Rc<RefCell<render::RenderData<R>>>
+    render_data: Rc<RefCell<render::RenderData<R, F>>>
 }
 
-impl<R: gfx::Resources> Gui<R> {
+impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
     pub fn root(&self) -> &widget::Layout<R> { &self.root }
     pub fn root_mut(&mut self) -> &mut widget::Layout<R> { &mut self.root }
 
-    pub fn new<F: gfx::Factory<R>>(factory: &mut F, root: widget::Layout<R>) -> Gui<R> {
+    pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, root: widget::Layout<R>, spawner: FactorySpawner) -> Gui<R, F>
+        where FactorySpawner: Fn(&mut D) -> F
+    {
         Gui {
             root: root,
-            render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
+            render_data: Rc::new(RefCell::new(render::RenderData::new(device, spawner)))
         }
     }
 
-    pub fn render<F: gfx::Factory<R>, S: gfx::Stream<R>>(
+    pub fn render<S: gfx::Stream<R>>(
         &mut self,
         factory: &mut F, stream: &mut S)
     {

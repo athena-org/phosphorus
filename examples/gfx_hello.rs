@@ -15,6 +15,7 @@
 extern crate phosphorus;
 extern crate glutin;
 extern crate gfx;
+extern crate gfx_device_gl;
 extern crate gfx_window_glutin;
 
 use gfx::traits::*;
@@ -53,7 +54,7 @@ fn main() {
             .with_text("Click me?")
             .build_boxed())
         .build();
-    let mut gui = phosphorus::Gui::new(&mut factory, root);
+    let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
 
     // Run our actual UI loop
     'main: loop {
