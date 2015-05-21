@@ -138,7 +138,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
         // Set up our text renderer
         let text_renderer = gfx_text::new(spawner(device))
             .with_size(13)
-            .with_font("examples/assets/Roboto-Regular.ttf")
+            .with_font_data(include_bytes!("../../assets/Roboto-Regular.ttf"))
             .build().unwrap();
 
         RenderData {
