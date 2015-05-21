@@ -35,7 +35,7 @@ impl ButtonBuilder {
         }
     }
 
-    /// Requests a specific text content for the widget.
+    /// Requests a text content for the widget.
     pub fn with_text(mut self, text: &str) -> ButtonBuilder {
         self.text = String::from(text);
         self
@@ -61,6 +61,7 @@ impl ButtonBuilder {
     }
 }
 
+/// Represents a widget that detects mouse click input.
 pub struct Button<R: gfx::Resources> {
     text: String,
     size: [i32; 2],

@@ -19,35 +19,34 @@ use widget;
 use render;
 use Event;
 
+/// Object that allows you to build image widgets.
 pub struct ImageBuilder {
     image_source: String,
     size: [i32; 2]
 }
 
-impl Default for ImageBuilder {
-    fn default() -> ImageBuilder {
+impl ImageBuilder {
+    /// Initializes a new `ImageBuilder` with default values.
+    pub fn new() -> ImageBuilder {
         ImageBuilder {
             image_source: String::default(),
             size: [0, 0]
         }
     }
-}
 
-impl ImageBuilder {
-    pub fn new() -> ImageBuilder {
-        ImageBuilder::default()
-    }
-
+    /// Requests an image to be loaded in to be displayed.
     pub fn with_source(mut self, source: &str) -> ImageBuilder {
         self.image_source = String::from(source);
         self
     }
 
+    /// Requests a size to show the widget at.
     pub fn with_size(mut self, size: [i32; 2]) -> ImageBuilder {
         self.size = size;
         self
     }
 
+    /// Builds the widget.
     pub fn build_boxed<R: gfx::Resources, F: gfx::Factory<R>>(self, factory: &mut F) -> Box<Image<R>> {
         let settings = gfx_texture::Settings::new();
         let tex = gfx_texture::Texture::from_path(factory, self.image_source, &settings).unwrap();
@@ -59,6 +58,7 @@ impl ImageBuilder {
     }
 }
 
+/// Represents a widget with an image content.
 pub struct Image<R: gfx::Resources> {
     texture: gfx_texture::Texture<R>,
     size: [i32;2]
