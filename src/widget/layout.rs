@@ -56,6 +56,7 @@ impl<R: gfx::Resources> LayoutBuilder<R> {
     }
 }
 
+/// Represents a widget with other widgets as content.
 pub struct Layout<R: gfx::Resources> {
     background: LayoutBackground,
     widgets: Vec<Box<widget::Widget<R>>>

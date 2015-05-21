@@ -20,7 +20,7 @@
 //! let root = phosphorus::widget::LayoutBuilder::new()
 //!     .with_background_color([21, 23, 24])
 //!     .build();
-//! let mut gui = phosphorus::Gui::new(&mut canvas.factory, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
+//! let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
 //! ```
 //!
 //! Then you can render it using a gfx `Factory` and `Stream` combination.
@@ -72,6 +72,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
     /// Sets the root layout.
     pub fn set_root(&mut self, root: widget::Layout<R>) { self.root = root; }
 
+    /// Raises an event in the Gui.
     pub fn raise_event<S: gfx::Stream<R>>(&mut self, stream: &S, event: Event) {
         let (x, y) = stream.get_output().get_size();
         let area = render::RenderArea {
@@ -82,6 +83,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
         self.root.raise_event(&event, &area);
     }
 
+    /// Renders the Gui to the target stream.
     pub fn render<S: gfx::Stream<R>>(
         &mut self,
         factory: &mut F, stream: &mut S)
