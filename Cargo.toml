@@ -18,32 +18,20 @@ version = "0.0.1"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
-[dependencies.cgmath]
-git = "https://github.com/bjz/cgmath-rs"
+[dependencies]
+cgmath = "0.2.0"
+gfx = "0.5.2"
+gfx_text = "0.0.0"
+piston-gfx_texture = "0.0.6"
 
-[dependencies.gfx]
-git = "https://github.com/gfx-rs/gfx-rs"
+# [dependencies.jade] Not yet needed
+# git = "https://github.com/athena-org/jade-rs"
+# branch = "develop"
 
-[dependencies.gfx_text]
-git = "https://github.com/PistonDevelopers/gfx_text"
-
-[dependencies.jade]
-git = "https://github.com/athena-org/jade-rs"
-branch = "develop"
-
-[dependencies.piston-gfx_texture]
-git = "https://github.com/PistonDevelopers/gfx_texture"
-
-# Dependencies for Examples
-
-[dev-dependencies.gfx_device_gl]
-git = "https://github.com/gfx-rs/gfx_device_gl"
-
-[dev-dependencies.gfx_window_glutin]
-git = "https://github.com/gfx-rs/gfx_window_glutin"
-
-[dev-dependencies.glutin]
-git = "https://github.com/tomaka/glutin"
+[dev-dependencies]
+glutin = "0.1.6"
+gfx_device_gl = "0.3.1"
+gfx_window_glutin = "0.1.1"
 
 # [dev-dependencies.piston]
 # git = "https://github.com/PistonDevelopers/piston"
