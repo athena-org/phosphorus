@@ -20,7 +20,7 @@
 //! let root = phosphorus::widget::LayoutBuilder::new()
 //!     .with_background_color([21, 23, 24])
 //!     .build();
-//! let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
+//! let mut gui = phosphorus::Gui::new(&mut factory, root);
 //! ```
 //!
 //! Then you can render it using a gfx `Factory` and `Stream` combination.
@@ -54,14 +54,12 @@ pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
     render_data: Rc<RefCell<render::RenderData<R, F>>>
 }
 
-impl<R: gfx::Resources, F: gfx::Factory<R>> Gui<R, F> {
+impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Initializes a new Gui with default values.
-    pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, root: widget::Layout<R>, spawner: FactorySpawner) -> Gui<R, F>
-        where FactorySpawner: Fn(&mut D) -> F
-    {
+    pub fn new(factory: &mut F, root: widget::Layout<R>) -> Gui<R, F> {
         Gui {
             root: root,
-            render_data: Rc::new(RefCell::new(render::RenderData::new(device, spawner)))
+            render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
         }
     }
 

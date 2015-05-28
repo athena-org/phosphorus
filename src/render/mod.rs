@@ -113,12 +113,8 @@ pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
     text_renderer: gfx_text::Renderer<R, F>
 }
 
-impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
-    pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, spawner: FactorySpawner) -> RenderData<R, F>
-        where FactorySpawner: Fn(&mut D) -> F
-    {
-        let mut factory = spawner(device);
-
+impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
+    pub fn new(factory: &mut F) -> RenderData<R, F> {
         // Set up the stuff we'll need to render
         let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
             Ok(v) => v,
@@ -136,7 +132,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
                 gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
-        let text_renderer = gfx_text::new(spawner(device))
+        let text_renderer = gfx_text::new(factory.clone())
             .with_size(13)
             .with_font_data(include_bytes!("../../assets/Roboto-Regular.ttf"))
             .build().unwrap();

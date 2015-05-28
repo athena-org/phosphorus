@@ -21,8 +21,6 @@ extern crate gfx_window_glutin;
 use gfx::traits::*;
 use phosphorus::widget::*;
 
-//static HELLO_MARKUP: &'static str = include_str!("assets/hello-markup.jade");
-
 fn main() {
     // Set up our window
     let (mut stream, mut device, mut factory) = {
@@ -55,7 +53,7 @@ fn main() {
             .with_callback(Box::new(|| println!("Hello")))
             .build_boxed())
         .build();
-    let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
+    let mut gui = phosphorus::Gui::new(&mut factory, root);
 
     // Run our actual UI loop
     'main: loop {
