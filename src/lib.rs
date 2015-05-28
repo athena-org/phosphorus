@@ -35,12 +35,14 @@ extern crate gfx;
 extern crate gfx_text;
 extern crate gfx_texture;
 
-use gfx::traits::*;
-use std::cell::RefCell;
-use std::rc::Rc;
-
+pub mod elements;
 mod render;
 pub mod widget;
+
+use gfx::{Output};
+use std::cell::{RefCell};
+use std::rc::{Rc};
+use elements::{Layout, CollapsedLayout};
 
 pub enum Event {
     MouseMoved([i32; 2]),
@@ -50,35 +52,32 @@ pub enum Event {
 
 /// Represents a Gui and provides tools to render it.
 pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
-    root: widget::Layout<R>,
+    template: Layout,
+    collapsed_template: CollapsedLayout,
     render_data: Rc<RefCell<render::RenderData<R, F>>>
 }
 
 impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Initializes a new Gui with default values.
-    pub fn new(factory: &mut F, root: widget::Layout<R>) -> Gui<R, F> {
+    pub fn new(factory: &mut F, template: Layout) -> Gui<R, F> {
+        let collapsed = template.collapse();
+
         Gui {
-            root: root,
+            template: template,
+            collapsed_template: collapsed,
             render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
         }
     }
 
-    /// Gets the root layout as immutable.
-    pub fn root(&self) -> &widget::Layout<R> { &self.root }
-    /// Gets the root layout as mutable.
-    pub fn root_mut(&mut self) -> &mut widget::Layout<R> { &mut self.root }
-    /// Sets the root layout.
-    pub fn set_root(&mut self, root: widget::Layout<R>) { self.root = root; }
-
     /// Raises an event in the Gui.
     pub fn raise_event<S: gfx::Stream<R>>(&mut self, stream: &S, event: Event) {
-        let (x, y) = stream.get_output().get_size();
+        /*let (x, y) = stream.get_output().get_size();
         let area = render::RenderArea {
             position: [0, 0],
             size: [x as i32, y as i32]
         };
 
-        self.root.raise_event(&event, &area);
+        self.root.raise_event(&event, &area);*/
     }
 
     /// Renders the Gui to the target stream.
@@ -95,6 +94,6 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
 
         // Actually tell the root layout to render to the data
         let mut renderer = render::ConcreteRenderer::new(factory, stream, self.render_data.clone(), &area);
-        self.root.render(&mut renderer, &area);
+        //self.collapsed_template.render(&mut renderer, &area);
     }
 }
