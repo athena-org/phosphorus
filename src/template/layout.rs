@@ -12,11 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod layout;
-mod text;
+use template::{TemplateNode};
 
-pub use elements::text::{Text};
-pub use elements::layout::{Layout, CollapsedLayout};
+pub struct Layout {
+    children: Vec<Box<TemplateNode>>
+}
 
-pub trait Element {
+impl Layout {
+    pub fn new() -> Self {
+        Layout {
+            children: Vec::new()
+        }
+    }
+
+    pub fn with_child<T: TemplateNode + 'static>(mut self, node: T) -> Self {
+        self.children.push(Box::new(node));
+        self
+    }
+}
+
+impl TemplateNode for Layout {
 }

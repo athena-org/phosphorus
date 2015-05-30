@@ -35,14 +35,13 @@ extern crate gfx;
 extern crate gfx_text;
 extern crate gfx_texture;
 
-pub mod elements;
 mod render;
-pub mod widget;
+mod runtime;
+pub mod template;
 
 use gfx::{Output};
 use std::cell::{RefCell};
 use std::rc::{Rc};
-use elements::{Layout, CollapsedLayout};
 
 pub enum Event {
     MouseMoved([i32; 2]),
@@ -52,19 +51,20 @@ pub enum Event {
 
 /// Represents a Gui and provides tools to render it.
 pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
-    template: Layout,
-    collapsed_template: CollapsedLayout,
+    template: Rc<template::Layout>,
+    runtime: runtime::Layout,
     render_data: Rc<RefCell<render::RenderData<R, F>>>
 }
 
-impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
+impl<'a, R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Initializes a new Gui with default values.
-    pub fn new(factory: &mut F, template: Layout) -> Gui<R, F> {
-        let collapsed = template.collapse();
+    pub fn new(factory: &mut F, template: template::Layout) -> Gui<R, F> {
+        let boxed = Rc::new(template);
+        let runtime = runtime::Layout::new(boxed.clone());
 
         Gui {
-            template: template,
-            collapsed_template: collapsed,
+            template: boxed,
+            runtime: runtime,
             render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
         }
     }
@@ -94,6 +94,6 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
 
         // Actually tell the root layout to render to the data
         let mut renderer = render::ConcreteRenderer::new(factory, stream, self.render_data.clone(), &area);
-        //self.collapsed_template.render(&mut renderer, &area);
+        //self.collapsed_layout.render(&mut renderer, &area);
     }
 }
