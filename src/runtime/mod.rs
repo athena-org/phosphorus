@@ -12,19 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::{Rc};
-use template;
+mod layout;
 
-pub struct RuntimeNode;
+pub use self::layout::{Layout, LayoutArea};
 
-pub struct Layout {
-    template: Rc<template::Layout>
-}
-
-impl Layout {
-    pub fn new(template: Rc<template::Layout>) -> Layout {
-        Layout {
-            template: template
-        }
-    }
+trait RuntimeNode {
 }

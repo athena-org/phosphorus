@@ -23,7 +23,7 @@ license = "Apache-2.0"
 
 [dependencies]
 cgmath = "0.2.0"
-gfx = "0.6.0"
+gfx = "0.6.2"
 gfx_text = "0.2.0"
 piston-gfx_texture = "0.0.7"
 

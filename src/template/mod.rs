@@ -15,7 +15,7 @@
 mod layout;
 mod text;
 
-pub use self::layout::{Layout};
+pub use self::layout::{Layout, LayoutBackground};
 pub use self::text::{Text};
 
 pub trait TemplateNode {

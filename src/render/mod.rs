@@ -13,13 +13,14 @@
 // limitations under the License.
 
 use std;
+use std::cell::{RefCell};
+use std::rc::{Rc};
 use cgmath;
 use cgmath::FixedArray;
 use gfx;
 use gfx::traits::*;
 use gfx_text;
-use std::cell::RefCell;
-use std::rc::Rc;
+use runtime::{LayoutArea};
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -94,11 +95,6 @@ gfx_parameters!( TexturedParams {
     u_Texture@ texture: gfx::shade::TextureParam<R>,
 });
 
-pub struct RenderArea {
-    pub position: [i32; 2],
-    pub size: [i32; 2]
-}
-
 pub struct RenderOffset {
     pub position: [i32; 2]
 }
@@ -168,7 +164,7 @@ pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: '
 impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
     pub fn new(
         factory: &'a mut F, stream: &'a mut S,
-        render_data: Rc<RefCell<RenderData<R, F>>>, area: &RenderArea
+        render_data: Rc<RefCell<RenderData<R, F>>>, area: &LayoutArea
     )-> ConcreteRenderer<'a, R, F, S> {
         // Prepare shared uniform data that never has to change
         let proj = cgmath::ortho::<f32>(

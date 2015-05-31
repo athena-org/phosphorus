@@ -39,9 +39,10 @@ mod render;
 mod runtime;
 pub mod template;
 
-use gfx::{Output};
 use std::cell::{RefCell};
 use std::rc::{Rc};
+use gfx::{Output};
+use runtime::{LayoutArea};
 
 pub enum Event {
     MouseMoved([i32; 2]),
@@ -87,13 +88,13 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     {
         // Set up a layout area to the whole screen
         let (x, y) = stream.get_output().get_size();
-        let area = render::RenderArea {
+        let area = LayoutArea {
             position: [0, 0],
             size: [x as i32, y as i32]
         };
 
         // Actually tell the root layout to render to the data
         let mut renderer = render::ConcreteRenderer::new(factory, stream, self.render_data.clone(), &area);
-        //self.collapsed_layout.render(&mut renderer, &area);
+        self.runtime.render(&mut renderer, &area);
     }
 }

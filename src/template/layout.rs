@@ -14,20 +14,37 @@
 
 use template::{TemplateNode};
 
+pub enum LayoutBackground {
+    None,
+    Color([f32; 3])
+}
+
 pub struct Layout {
-    children: Vec<Box<TemplateNode>>
+    children: Vec<Box<TemplateNode>>,
+    background: LayoutBackground
 }
 
 impl Layout {
     pub fn new() -> Self {
         Layout {
-            children: Vec::new()
+            children: Vec::new(),
+            background: LayoutBackground::None
         }
     }
 
     pub fn with_child<T: TemplateNode + 'static>(mut self, node: T) -> Self {
         self.children.push(Box::new(node));
         self
+    }
+
+    pub fn with_background_color(mut self, color: [u8; 3]) -> Self {
+        let rgb = [(color[0] as f32)/255.0, (color[1] as f32)/255.0, (color[2] as f32)/255.0];
+        self.background = LayoutBackground::Color(rgb);
+        self
+    }
+
+    pub fn background(&self) -> &LayoutBackground {
+        &self.background
     }
 }
 
