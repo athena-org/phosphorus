@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::{Any};
-use std::rc::{Rc};
-use runtime;
-use runtime::{RuntimeNode};
 use template::{TemplateNode};
 
-#[derive(Clone)]
 pub struct Text {
     text: String
 }
@@ -37,11 +32,4 @@ impl Text {
 }
 
 impl TemplateNode for Text {
-    fn create_runtime(self) -> Box<RuntimeNode> {
-        unimplemented!();
-    }
-
-    fn clone_boxed(&self) -> Box<TemplateNode> {
-        Box::new(self.clone())
-    }
 }

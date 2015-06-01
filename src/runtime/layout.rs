@@ -25,19 +25,13 @@ pub struct LayoutArea {
 }
 
 pub struct Layout {
-    children: Vec<Box<RuntimeNode>>,
-    background: LayoutBackground
+    template: Rc<template::Layout>
 }
 
 impl Layout {
     pub fn new(template: Rc<template::Layout>) -> Layout {
-        let children: Vec<_> = template.children().into_iter()
-            .map(|c| c.create_runtime())
-            .collect();
-
         Layout {
-            children: children,
-            background: template.background()
+            template: template
         }
     }
 
@@ -53,7 +47,7 @@ impl Layout {
         renderer: &mut render::Renderer<R>,
         area: &LayoutArea)
     {
-        match self.background {
+        match *self.template.background() {
             // Different background types render differently
             LayoutBackground::None => {},
             LayoutBackground::Color(c) => {
