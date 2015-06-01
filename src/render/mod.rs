@@ -129,9 +129,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
         let sampler = factory.create_sampler(
             gfx::tex::SamplerInfo::new(
                 gfx::tex::FilterMethod::Bilinear,
-                gfx::tex::WrapMode::Clamp
-            )
-        );
+                gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
         let text_renderer = gfx_text::new(factory.clone())

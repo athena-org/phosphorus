@@ -15,9 +15,6 @@
 [package]
 name = "phosphorus"
 version = "0.0.1"
-description = "A template based GUI library for games and desktop applications."
-homepage = "https://github.com/athena-org/phosphorus"
-repository = "https://github.com/athena-org/phosphorus"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
