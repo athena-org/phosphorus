@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod layout;
-mod text;
-
-pub use self::layout::{Layout, LayoutBackground};
-pub use self::text::{Text};
-
 use std::rc::{Rc};
 use runtime::{RuntimeNode};
+use template;
 
-pub trait TemplateNode {
-    fn create_runtime(self) -> Box<RuntimeNode>;
-    fn clone_boxed(&self) -> Box<TemplateNode>;
+pub struct Text {
+    text: Rc<template::Text>
 }
 
-impl Clone for Box<TemplateNode> {
-    fn clone(&self) -> Self {
-        self.clone_boxed()
+impl Text {
+    pub fn new(text: Rc<template::Text>) -> Text {
+        Text {
+            text: text
+        }
     }
+}
+
+impl RuntimeNode for Text {
 }

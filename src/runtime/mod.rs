@@ -13,8 +13,10 @@
 // limitations under the License.
 
 mod layout;
+mod text;
 
 pub use self::layout::{Layout, LayoutArea};
+pub use self::text::{Text};
 
-trait RuntimeNode {
+pub trait RuntimeNode {
 }
