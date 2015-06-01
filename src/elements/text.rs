@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::{Rc};
-use template;
+use elements::{Element};
 
-pub struct RuntimeNode;
+pub struct Text;
 
-pub struct Layout {
-    template: Rc<template::Layout>
+impl Text {
+    pub fn new() -> Text {
+        Text
+    }
+
+    pub fn with_text(self, text: String) -> Self {
+        self
+    }
 }
 
-impl Layout {
-    pub fn new(template: Rc<template::Layout>) -> Layout {
-        Layout {
-            template: template
-        }
-    }
+impl Element for Text {
 }

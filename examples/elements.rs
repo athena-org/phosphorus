@@ -19,7 +19,7 @@ extern crate gfx_device_gl;
 extern crate gfx_window_glutin;
 
 use gfx::traits::*;
-use phosphorus::template::{Layout, Text};
+use phosphorus::elements::{Text, Layout};
 
 fn main() {
     // Set up our window
@@ -32,15 +32,9 @@ fn main() {
         gfx_window_glutin::init(window)
     };
 
-    struct HelloController {
-        text: String
-    }
-
     // Create our view template
     let template = Layout::new()
-        .with_child(Text::new()
-            .with_text(String::from("Hello World!"))
-        );
+        .with_element(Text::new().with_text(String::from("Hello World!")));
 
     // Set up the Gui with the template
     let mut gui = phosphorus::Gui::new(&mut factory, template);

@@ -12,24 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use template::{TemplateNode};
+use elements::{Element};
 
-pub struct Text {
-    text: String
-}
+pub struct Layout;
 
-impl Text {
-    pub fn new() -> Self {
-        Text {
-            text: String::new()
-        }
+impl Layout {
+    pub fn new() -> Layout {
+        Layout
     }
 
-    pub fn with_text(mut self, text: String) -> Self {
-        self.text = text;
+    pub fn with_element<T: Element>(self, element: T) -> Self {
         self
     }
+
+    pub fn collapse(&self) -> CollapsedLayout {
+        CollapsedLayout
+    }
 }
 
-impl TemplateNode for Text {
+impl Element for Layout {
+}
+
+
+pub struct CollapsedLayout;
+
+impl CollapsedLayout {
 }
