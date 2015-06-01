@@ -38,7 +38,6 @@ fn main() {
 
     // Create our view template
     let template = Layout::new()
-        .with_background_color([21, 23, 24])
         .with_child(Text::new()
             .with_text(String::from("Hello World!"))
         );
