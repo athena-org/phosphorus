@@ -15,18 +15,17 @@
 [package]
 name = "phosphorus"
 version = "0.0.1"
+description = "A template based GUI library for games and desktop applications."
+homepage = "https://github.com/athena-org/phosphorus"
+repository = "https://github.com/athena-org/phosphorus"
 authors = ["The Athena Developers"]
 license = "Apache-2.0"
 
 [dependencies]
 cgmath = "0.2.0"
-gfx = "0.6.0"
-# gfx_text = "0.2.0"
+gfx = "0.6.2"
+gfx_text = "0.3.1"
 piston-gfx_texture = "0.0.7"
-
-[dependencies.gfx_text]
-git = "https://github.com/Kagami/gfx_text"
-branch = "gfx-0.6"
 
 [dev-dependencies]
 glutin = "0.1.6"
