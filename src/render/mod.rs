@@ -244,11 +244,11 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
 
     fn render_text(&mut self, position: [i32; 2], text: &str) {
         let mut render_data = self.render_data.borrow_mut();
-        render_data.text_renderer.draw(
+        render_data.text_renderer.add(
             text,
             position,
             [1.0, 1.0, 1.0, 1.0],
         );
-        render_data.text_renderer.draw_end_at(self.stream, self.projection_matrix.clone()).unwrap();
+        render_data.text_renderer.draw_at(self.stream, self.projection_matrix.clone()).unwrap();
     }
 }

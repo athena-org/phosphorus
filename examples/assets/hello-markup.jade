@@ -5,6 +5,18 @@ text.hello-text.
     Hello Line #2
 text.hello-inline Hello World
 
-horizontal
+layout(direction="horizontal")
     button#click-me-1 Click Me!
     button#click-me-2 No, Click Me!
+
+let(hello={new("ColorController")} color={new("ColorController")})
+    button(on_click={hello.clicked = true}) Click?
+    if hello.clicked
+        text Clicked!
+    else
+        text Not Clicked!
+        
+    button(on_click={color.clicked()} style_color={color.color})
+    
+let(some_value="Hello World!")
+    text {some_value}

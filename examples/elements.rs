@@ -19,7 +19,7 @@ extern crate gfx_device_gl;
 extern crate gfx_window_glutin;
 
 use gfx::traits::*;
-use phosphorus::widget::*;
+use phosphorus::element::{TemplateElement};
 
 fn main() {
     // Set up our window
@@ -32,29 +32,11 @@ fn main() {
         gfx_window_glutin::init(window)
     };
 
-    struct ClickController { clicked: bool };
-    let controller = ClickController { clicked: false };
-
     // Set up our Phosphorus UI
-    let root = phosphorus::widget::LayoutBuilder::new()
-        .with_background_color([21, 23, 24])
-        .with_widget(phosphorus::widget::TextBuilder::new()
-            .with_text("Hello World!")
-            .build_boxed())
-        .with_widget(phosphorus::widget::ImageBuilder::new()
-            .with_source("./examples/assets/test.png")
-            .with_size([200, 200])
-            .build_boxed(&mut factory))
-        .with_widget(phosphorus::widget::ControllerBuilder::new(controller)
-            .with_widget(phosphorus::widget::ButtonBuilder::new()
-                .with_text("Click me?")
-                .with_callback(Box::new(|| println!("Hello")))
-                .build_boxed())
-            .with_widget(phosphorus::widget::TextBuilder::new()
-                .with_text("Not clicked!")
-                .build_boxed()))
-        .build();
-    let mut gui = phosphorus::Gui::new(&mut factory, root);
+    let template = TemplateElement::new("layout")
+        .with_attr("background_color", "[21, 23, 24]")
+        .with_child(TemplateElement::new("text").with_attr("value", "Hello world!"));
+    let mut gui = phosphorus::Gui::new(&mut factory, template);
 
     // Run our actual UI loop
     'main: loop {
