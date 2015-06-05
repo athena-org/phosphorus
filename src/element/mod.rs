@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::{HashMap};
 use rustc_serialize::json;
 
 pub struct TemplateElement {
     name: String,
-    attrs: Vec<bool>,
+    attrs: HashMap<String, String>,
     children: Vec<TemplateElement>
 }
 
@@ -24,7 +25,7 @@ impl TemplateElement {
     pub fn new(name: &str) -> Self {
         TemplateElement {
             name: String::from(name),
-            attrs: Vec::new(),
+            attrs: HashMap::new(),
             children: Vec::new()
         }
     }
@@ -32,8 +33,7 @@ impl TemplateElement {
     // # Setters
 
     pub fn with_attr(mut self, key: &str, value: &str) -> Self {
-        // TODO: Actually set attributes
-        self.attrs.push(true);
+        self.attrs.insert(String::from(key), String::from(value));
         self
     }
 
@@ -46,6 +46,10 @@ impl TemplateElement {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn attrs(&self) -> &HashMap<String, String> {
+        &self.attrs
     }
 
     pub fn children(&self) -> &Vec<TemplateElement> {
@@ -81,7 +85,7 @@ impl DomElement {
     }
 
     pub fn get_attr(&self, key: &str) -> Option<String> {
-        unimplemented!();
+        self.template.attrs().get(key).map(|s| s.clone())
     }
 
     pub fn get_attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
@@ -116,7 +120,7 @@ mod tests {
     use element::{TemplateElement};
 
     #[test]
-    fn domelement_get_attr_lookup() {
+    fn domelement_get_attr_looks_up_value() {
         // Arrange
         let element = TemplateElement::new("test")
             .with_attr("foo", "bar")

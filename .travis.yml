@@ -4,5 +4,5 @@ rust:
   - nightly
 script:
   - cargo build -v
-#  - cargo test -v
+  - cargo test --lib -v
 #  - cargo doc -v
