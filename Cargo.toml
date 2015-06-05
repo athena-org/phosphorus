@@ -26,6 +26,7 @@ cgmath = "0.2.0"
 gfx = "0.6.0"
 gfx_text = "0.4.0"
 piston-gfx_texture = "0.0.7"
+rustc-serialize = "0.3.14"
 
 [dev-dependencies]
 glutin = "0.1.6"

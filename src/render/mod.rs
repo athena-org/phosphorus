@@ -20,6 +20,7 @@ use gfx::traits::*;
 use gfx_text;
 use std::cell::RefCell;
 use std::rc::Rc;
+use element::{DomElement};
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -94,16 +95,7 @@ gfx_parameters!( TexturedParams {
     u_Texture@ texture: gfx::shade::TextureParam<R>,
 });
 
-pub struct RenderArea {
-    pub position: [i32; 2],
-    pub size: [i32; 2]
-}
-
-pub struct RenderOffset {
-    pub position: [i32; 2]
-}
-
-pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
+pub struct RenderCache<R: gfx::Resources, F: gfx::Factory<R>> {
     draw_state: gfx::DrawState,
     sampler: gfx::device::handle::Sampler<R>,
 
@@ -113,8 +105,8 @@ pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
     text_renderer: gfx_text::Renderer<R, F>
 }
 
-impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
-    pub fn new(factory: &mut F) -> RenderData<R, F> {
+impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderCache<R, F> {
+    pub fn new(factory: &mut F) -> Self {
         // Set up the stuff we'll need to render
         let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
             Ok(v) => v,
@@ -137,7 +129,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
             .with_font_data(include_bytes!("../../assets/Roboto-Regular.ttf"))
             .build().unwrap();
 
-        RenderData {
+        RenderCache {
             draw_state: state,
             sampler: sampler,
 
@@ -149,42 +141,35 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
     }
 }
 
-pub trait Renderer<R: gfx::Resources> {
-    fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]);
-    fn render_rect_textured(&mut self, position: [i32; 2], size: [i32; 2], texture: gfx::handle::Texture<R>);
-    fn render_text(&mut self, position: [i32; 2], text: &str);
-}
-
-pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: 'a + Stream<R>> {
-    render_data: Rc<RefCell<RenderData<R, F>>>,
+pub struct RenderHelper<'a, R: gfx::Resources, S: 'a + Stream<R>, F: 'a + gfx::Factory<R>> {
+    render_data: Rc<RefCell<RenderCache<R, F>>>,
     projection_matrix: [[f32; 4]; 4],
 
-    factory: &'a mut F,
-    stream: &'a mut S
+    stream: &'a mut S,
+    factory: &'a mut F
 }
 
-impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
+impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<'a, R, S, F> {
     pub fn new(
-        factory: &'a mut F, stream: &'a mut S,
-        render_data: Rc<RefCell<RenderData<R, F>>>, area: &RenderArea
-    )-> ConcreteRenderer<'a, R, F, S> {
+        stream: &'a mut S, factory: &'a mut F,
+        render_data: Rc<RefCell<RenderCache<R, F>>>
+    )-> Self {
         // Prepare shared uniform data that never has to change
+        let (w, h) = stream.get_output().get_size();
         let proj = cgmath::ortho::<f32>(
-            0.0, area.size[0] as f32,
-            area.size[1] as f32, 0.0,
+            0.0, w as f32,
+            h as f32, 0.0,
             1.0, -1.0).into_fixed();
 
-        ConcreteRenderer {
+        RenderHelper {
             render_data: render_data,
             projection_matrix: proj,
 
-            factory: factory,
-            stream: stream
+            stream: stream,
+            factory: factory
         }
     }
-}
 
-impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for ConcreteRenderer<'a, R, F, S> {
     fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]) {
         let render_data = &self.render_data.borrow();
 
@@ -251,4 +236,19 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
         );
         render_data.text_renderer.draw_at(self.stream, self.projection_matrix.clone()).unwrap();
     }
+}
+
+pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
+    stream: &mut S, factory: &mut F,
+    render_cache: Rc<RefCell<RenderCache<R, F>>>,
+    dom: &DomElement)
+{
+    let mut helper = RenderHelper::new(stream, factory, render_cache);
+    render_element_recursive(&mut helper, &dom);
+}
+
+fn render_element_recursive<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
+    helper: &mut RenderHelper<R, S, F>,
+    dom: &DomElement)
+{
 }

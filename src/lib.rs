@@ -34,6 +34,7 @@ extern crate cgmath;
 extern crate gfx;
 extern crate gfx_text;
 extern crate gfx_texture;
+extern crate rustc_serialize;
 
 pub mod element;
 mod render;
@@ -52,20 +53,21 @@ pub enum Event {
 /// Represents a Gui and provides tools to render it.
 pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
     dom: DomElement,
-    render_data: Rc<RefCell<render::RenderData<R, F>>>
+    render_cache: Rc<RefCell<render::RenderCache<R, F>>>
 }
 
 impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
-    /// Initializes a new Gui with default values.
+    /// Initializes a new GUI with default values.
     pub fn new(factory: &mut F, template: TemplateElement) -> Gui<R, F> {
         Gui {
             dom: template.to_dom(),
-            render_data: Rc::new(RefCell::new(render::RenderData::new(factory)))
+            render_cache: Rc::new(RefCell::new(render::RenderCache::new(factory)))
         }
     }
 
-    /// Raises an event in the Gui.
+    /// Raises an event in the GUI.
     pub fn raise_event<S: gfx::Stream<R>>(&mut self, stream: &S, event: Event) {
+        // TODO: Calculate this using the latest frame's data, since that's what's visible at this point
         /*let (x, y) = stream.get_output().get_size();
         let area = render::RenderArea {
             position: [0, 0],
@@ -78,17 +80,9 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Renders the Gui to the target stream.
     pub fn render<S: gfx::Stream<R>>(
         &mut self,
-        factory: &mut F, stream: &mut S)
+        stream: &mut S, factory: &mut F)
     {
-        // Set up a layout area to the whole screen
-        let (x, y) = stream.get_output().get_size();
-        let area = render::RenderArea {
-            position: [0, 0],
-            size: [x as i32, y as i32]
-        };
-
-        // Actually tell the root layout to render to the data
-        let mut renderer = render::ConcreteRenderer::new(factory, stream, self.render_data.clone(), &area);
-        //self.dom.render(&mut renderer, &area);
+        // Actually render the DOM
+        render::render(stream, factory, self.render_cache.clone(), &self.dom);
     }
 }

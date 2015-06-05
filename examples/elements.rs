@@ -34,7 +34,7 @@ fn main() {
 
     // Set up our Phosphorus UI
     let template = TemplateElement::new("layout")
-        .with_attr("background_color", "[21, 23, 24]")
+        .with_attr("style_background", "[21, 23, 24]")
         .with_child(TemplateElement::new("text").with_attr("value", "Hello world!"));
     let mut gui = phosphorus::Gui::new(&mut factory, template);
 
@@ -52,17 +52,13 @@ fn main() {
             }
         }
 
+        // Clear to remove any remaining data from the last frame
         stream.clear(gfx::ClearData {color: [1.0, 1.0, 1.0, 1.0], depth: 1.0, stencil: 0});
 
-        {
-            // Render our actual GUI
-            gui.render(&mut factory, &mut stream);
-        }
+        // Render our actual GUI
+        gui.render(&mut stream, &mut factory);
 
         // Show the rendered to buffer on the screen
-        //stream.present(&mut device); ICE!
-        stream.flush(&mut device);
-        stream.out.window.swap_buffers();
-        device.cleanup();
+        stream.present(&mut device);
     }
 }

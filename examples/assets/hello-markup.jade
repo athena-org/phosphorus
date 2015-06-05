@@ -11,7 +11,7 @@ layout(direction="horizontal")
 
 let(hello={new("ColorController")} color={new("ColorController")})
     button(on_click={hello.clicked = true}) Click?
-    if hello.clicked
+    if {hello.clicked}
         text Clicked!
     else
         text Not Clicked!

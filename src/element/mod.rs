@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use rustc_serialize::json;
+
 pub struct TemplateElement {
     name: String,
     attrs: Vec<bool>,
@@ -46,6 +48,10 @@ impl TemplateElement {
         &self.name
     }
 
+    pub fn children(&self) -> &Vec<TemplateElement> {
+        &self.children
+    }
+
     // # Utility
 
     pub fn to_dom(self) -> DomElement {
@@ -72,5 +78,55 @@ impl DomElement {
         // TODO: Actually update smartly instead of just wiping and re-creating everything
 
         // TODO: Wipe and re-create here
+    }
+
+    pub fn get_attr(&self, key: &str) -> Option<String> {
+        unimplemented!();
+    }
+
+    pub fn get_attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
+        let val_str = match self.get_attr(key) {
+            Some(s) => s,
+            None => return None
+        };
+
+        // TODO: Change this to use serde instead of rustc_serialize
+        match json::decode::<T>(&val_str) {
+            Ok(v) => Some(v),
+            Err(e) => None
+        }
+    }
+
+    pub fn get_size(&self) -> [f32; 2] {
+        let default = [100.0, 100.0];
+
+        let size = match self.get_attr_as::<Vec<f32>>("style_size") {
+            Some(s) => s,
+            None => return default
+        };
+
+        // Turn the vector into an array
+        if size.len() != 2 { return default; }
+        [*size.get(0).unwrap(), *size.get(1).unwrap()]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use element::{TemplateElement};
+
+    #[test]
+    fn domelement_get_attr_lookup() {
+        // Arrange
+        let element = TemplateElement::new("test")
+            .with_attr("foo", "bar")
+            .to_dom();
+
+        // Act
+        let bar = element.get_attr("foo");
+
+        // Assert
+        assert!(bar.is_some());
+        assert!(bar.unwrap() == "bar");
     }
 }
