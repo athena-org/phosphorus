@@ -262,4 +262,6 @@ fn render_element_recursive<R: gfx::Resources>(
     helper: &mut RenderHelper<R>)
 {
     let tag = element.tag();
+    let element_type = element_types.get_mut(tag).unwrap();
+    element_type.render(element, helper);
 }

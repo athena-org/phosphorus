@@ -17,14 +17,20 @@ use element::{DomElement};
 use render::{RenderHelper};
 
 pub trait ElementType<R: gfx::Resources> {
-    fn render(&mut self, element: &mut DomElement, helper: &mut RenderHelper<R>);
+    fn render(&mut self, element: &DomElement, helper: &mut RenderHelper<R>);
 }
 
 pub struct BlockType;
 
 impl<R: gfx::Resources> ElementType<R> for BlockType {
-    fn render(&mut self, element: &mut DomElement, helper: &mut RenderHelper<R>) {
+    fn render(&mut self, element: &DomElement, helper: &mut RenderHelper<R>) {
         let size = element.size();
-        helper.render_rect_flat([0, 0], [size[0] as i32, size[1] as i32], [0.5, 0.5, 0.5]);
+
+        let background_color = match element.attr_as::<Vec<i32>>("style_background") {
+            Some(c) => [c[0] as f32 / 255.0, c[1] as f32 / 255.0, c[2] as f32 / 255.0],
+            None => [0.0, 0.0, 0.0]
+        };
+
+        helper.render_rect_flat([0, 0], [size[0] as i32, size[1] as i32], background_color);
     }
 }
