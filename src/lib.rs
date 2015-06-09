@@ -37,6 +37,7 @@ extern crate gfx_texture;
 extern crate rustc_serialize;
 
 pub mod element;
+pub mod element_type;
 mod render;
 
 use gfx::traits::*;

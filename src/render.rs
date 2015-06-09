@@ -126,7 +126,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderCache<R, F> {
         // Set up our text renderer
         let text_renderer = gfx_text::new(factory.clone())
             .with_size(13)
-            .with_font_data(include_bytes!("../../assets/Roboto-Regular.ttf"))
+            .with_font_data(include_bytes!("../assets/Roboto-Regular.ttf"))
             .build().unwrap();
 
         RenderCache {
@@ -244,11 +244,12 @@ pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
     dom: &DomElement)
 {
     let mut helper = RenderHelper::new(stream, factory, render_cache);
-    render_element_recursive(&mut helper, &dom);
+    render_element_recursive(&dom, &mut helper);
 }
 
 fn render_element_recursive<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
-    helper: &mut RenderHelper<R, S, F>,
-    dom: &DomElement)
+    element: &DomElement,
+    helper: &mut RenderHelper<R, S, F>)
 {
+    let type = element.
 }

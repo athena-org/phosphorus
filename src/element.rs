@@ -84,12 +84,12 @@ impl DomElement {
         // TODO: Wipe and re-create here
     }
 
-    pub fn get_attr(&self, key: &str) -> Option<String> {
+    pub fn attr(&self, key: &str) -> Option<String> {
         self.template.attrs().get(key).map(|s| s.clone())
     }
 
-    pub fn get_attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
-        let val_str = match self.get_attr(key) {
+    pub fn attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
+        let val_str = match self.attr(key) {
             Some(s) => s,
             None => return None
         };
@@ -101,10 +101,10 @@ impl DomElement {
         }
     }
 
-    pub fn get_size(&self) -> [f32; 2] {
+    pub fn size(&self) -> [f32; 2] {
         let default = [100.0, 100.0];
 
-        let size = match self.get_attr_as::<Vec<f32>>("style_size") {
+        let size = match self.attr_as::<Vec<f32>>("style_size") {
             Some(s) => s,
             None => return default
         };
@@ -127,10 +127,37 @@ mod tests {
             .to_dom();
 
         // Act
-        let bar = element.get_attr("foo");
+        let bar = element.attr("foo");
 
         // Assert
         assert!(bar.is_some());
         assert!(bar.unwrap() == "bar");
+    }
+
+    #[test]
+    fn domelement_get_size_deserializes_value() {
+        // Arrange
+        let element = TemplateElement::new("test")
+            .with_attr("style_size", "[500, 92]")
+            .to_dom();
+
+        // Act
+        let size = element.size();
+
+        // Assert
+        assert!(size[0] == 500.0);
+        assert!(size[1] == 92.0);
+    }
+
+    #[test]
+    fn domelement_get_size_does_not_panic_on_lacking_data() {
+        // Arrange
+        let element = TemplateElement::new("test")
+            .to_dom();
+
+        // Act
+        let _ = element.size();
+
+        // If we reached this we know it works
     }
 }
