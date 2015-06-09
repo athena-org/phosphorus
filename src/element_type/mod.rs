@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use gfx;
 use element::{DomElement};
 use render::{RenderHelper};
 
 pub trait ElementType<R: gfx::Resources> {
-    fn render<S: Stream<R>, F: gfx::Factory<R>>(element: &mut DomElement, helper: &mut RenderHelper<R, S, F>);
+    fn render(&mut self, element: &mut DomElement, helper: &mut RenderHelper<R>);
 }
 
-struct BlockType;
+pub struct BlockType;
 
-impl<R: gfx::Resources> ElementType for BlockType<R> {
-    fn render<S: Stream<R>, F: gfx::Factory<R>>(element: &mut DomElement, helper: &mut RenderHelper<R, S, F>) {
-        let size = element.get_size();
+impl<R: gfx::Resources> ElementType<R> for BlockType {
+    fn render(&mut self, element: &mut DomElement, helper: &mut RenderHelper<R>) {
+        let size = element.size();
         helper.render_rect_flat([0, 0], [size[0] as i32, size[1] as i32], [0.5, 0.5, 0.5]);
     }
 }

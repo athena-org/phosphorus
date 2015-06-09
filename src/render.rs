@@ -13,14 +13,16 @@
 // limitations under the License.
 
 use std;
+use std::cell::RefCell;
+use std::collections::{HashMap};
+use std::rc::Rc;
 use cgmath;
 use cgmath::FixedArray;
 use gfx;
 use gfx::traits::*;
 use gfx_text;
-use std::cell::RefCell;
-use std::rc::Rc;
 use element::{DomElement};
+use element_type::{ElementType};
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -141,7 +143,13 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderCache<R, F> {
     }
 }
 
-pub struct RenderHelper<'a, R: gfx::Resources, S: 'a + Stream<R>, F: 'a + gfx::Factory<R>> {
+pub trait RenderHelper<R: gfx::Resources> {
+    fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]);
+    fn render_rect_textured(&mut self, position: [i32; 2], size: [i32; 2], texture: gfx::handle::Texture<R>);
+    fn render_text(&mut self, position: [i32; 2], text: &str);
+}
+
+pub struct ConcreteRenderHelper<'a, R: gfx::Resources, S: 'a + Stream<R>, F: 'a + gfx::Factory<R>> {
     render_data: Rc<RefCell<RenderCache<R, F>>>,
     projection_matrix: [[f32; 4]; 4],
 
@@ -149,7 +157,7 @@ pub struct RenderHelper<'a, R: gfx::Resources, S: 'a + Stream<R>, F: 'a + gfx::F
     factory: &'a mut F
 }
 
-impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<'a, R, S, F> {
+impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> ConcreteRenderHelper<'a, R, S, F> {
     pub fn new(
         stream: &'a mut S, factory: &'a mut F,
         render_data: Rc<RefCell<RenderCache<R, F>>>
@@ -161,7 +169,7 @@ impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<'a, R
             h as f32, 0.0,
             1.0, -1.0).into_fixed();
 
-        RenderHelper {
+        ConcreteRenderHelper {
             render_data: render_data,
             projection_matrix: proj,
 
@@ -169,7 +177,9 @@ impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<'a, R
             factory: factory
         }
     }
+}
 
+impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<R> for ConcreteRenderHelper<'a, R, S, F> {
     fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]) {
         let render_data = &self.render_data.borrow();
 
@@ -239,17 +249,17 @@ impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<'a, R
 }
 
 pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
+    dom: &DomElement, element_types: &mut HashMap<String, Box<ElementType<R> + 'static>>,
     stream: &mut S, factory: &mut F,
-    render_cache: Rc<RefCell<RenderCache<R, F>>>,
-    dom: &DomElement)
+    render_cache: Rc<RefCell<RenderCache<R, F>>>)
 {
-    let mut helper = RenderHelper::new(stream, factory, render_cache);
-    render_element_recursive(&dom, &mut helper);
+    let mut helper = ConcreteRenderHelper::new(stream, factory, render_cache);
+    render_element_recursive(dom, element_types, &mut helper);
 }
 
-fn render_element_recursive<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
-    element: &DomElement,
-    helper: &mut RenderHelper<R, S, F>)
+fn render_element_recursive<R: gfx::Resources>(
+    element: &DomElement, element_types: &mut HashMap<String, Box<ElementType<R> + 'static>>,
+    helper: &mut RenderHelper<R>)
 {
-    let type = element.
+    let tag = element.tag();
 }

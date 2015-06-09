@@ -16,15 +16,15 @@ use std::collections::{HashMap};
 use rustc_serialize::json;
 
 pub struct TemplateElement {
-    name: String,
+    tag: String,
     attrs: HashMap<String, String>,
     children: Vec<TemplateElement>
 }
 
 impl TemplateElement {
-    pub fn new(name: &str) -> Self {
+    pub fn new(tag: &str) -> Self {
         TemplateElement {
-            name: String::from(name),
+            tag: String::from(tag),
             attrs: HashMap::new(),
             children: Vec::new()
         }
@@ -44,8 +44,8 @@ impl TemplateElement {
 
     // # Getters
 
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn tag(&self) -> &str {
+        &self.tag
     }
 
     pub fn attrs(&self) -> &HashMap<String, String> {
@@ -72,16 +72,8 @@ pub struct DomElement {
 }
 
 impl DomElement {
-    /// Initializes the DomElement tree's bindings.
-    pub fn bindings_init(/* put scope table here */) {
-        unimplemented!();
-    }
-
-    /// Updates the DomElement tree based on the values its elements are bound to.
-    pub fn bindings_update() {
-        // TODO: Actually update smartly instead of just wiping and re-creating everything
-
-        // TODO: Wipe and re-create here
+    pub fn tag(&self) -> &str {
+        self.template.tag()
     }
 
     pub fn attr(&self, key: &str) -> Option<String> {
@@ -112,6 +104,18 @@ impl DomElement {
         // Turn the vector into an array
         if size.len() != 2 { return default; }
         [*size.get(0).unwrap(), *size.get(1).unwrap()]
+    }
+
+    /// Initializes the DomElement tree's bindings.
+    pub fn bindings_init(/* put scope table here */) {
+        unimplemented!();
+    }
+
+    /// Updates the DomElement tree based on the values its elements are bound to.
+    pub fn bindings_update() {
+        // TODO: Actually update smartly instead of just wiping and re-creating everything
+
+        // TODO: Wipe and re-create here
     }
 }
 
