@@ -261,9 +261,16 @@ fn render_element_recursive<R: gfx::Resources>(
     element: &DomElement, element_types: &mut ElementTypes<R>,
     helper: &mut RenderHelper<R>)
 {
-    // Look up the element's type
-    let element_type = element_types.get(element.tag());
+    {
+        // Look up the element's type
+        let element_type = element_types.get(element.tag());
 
-    // Actually render
-    element_type.render(element, helper);
+        // Actually render
+        element_type.render(element, helper);
+    }
+
+    // Render all the element's children
+    for child in element.children() {
+        render_element_recursive(child, element_types, helper);
+    }
 }

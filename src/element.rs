@@ -14,6 +14,7 @@
 
 use std::collections::{HashMap};
 
+#[derive(Clone)]
 pub struct TemplateElement {
     tag: String,
     attrs: HashMap<String, String>,
@@ -60,6 +61,7 @@ impl TemplateElement {
     pub fn to_dom(self) -> DomElement {
         DomElement {
             template: self,
+            children: Vec::new(),
             is_outdated: true
         }
     }
@@ -67,16 +69,34 @@ impl TemplateElement {
 
 pub struct DomElement {
     template: TemplateElement,
+    children: Vec<DomElement>,
     is_outdated: bool
 }
 
 impl DomElement {
+    /// Updates all outdated information with new information if needed.
+    pub fn update_outdated(&mut self) {
+        if !self.is_outdated { return; }
+
+        self.children.clear();
+
+        for child in self.template.children() {
+            self.children.push(child.clone().to_dom());
+        }
+
+        self.is_outdated = false;
+    }
+
     pub fn tag(&self) -> &str {
         self.template.tag()
     }
 
     pub fn attr(&self, key: &str) -> Option<String> {
         self.template.attrs().get(key).map(|s| s.clone())
+    }
+
+    pub fn children(&self) -> &Vec<DomElement> {
+        &self.children
     }
 }
 
@@ -96,18 +116,6 @@ mod domelement_attr_utils {
                 Ok(v) => Some(v),
                 Err(e) => None
             }
-        }
-
-        /// Initializes the DomElement tree's bindings.
-        pub fn bindings_init(/* put scope table here */) {
-            unimplemented!();
-        }
-
-        /// Updates the DomElement tree based on the values its elements are bound to.
-        pub fn bindings_update() {
-            // TODO: Actually update smartly instead of just wiping and re-creating everything
-
-            // TODO: Wipe and re-create here
         }
     }
 }

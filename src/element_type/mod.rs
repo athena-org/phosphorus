@@ -61,7 +61,7 @@ impl<R: gfx::Resources> ElementType<R> for BlockType {
             Some(c) => [c[0] as f32 / 255.0, c[1] as f32 / 255.0, c[2] as f32 / 255.0],
             None => [0.0, 0.0, 0.0]
         };
-
+        
         helper.render_rect_flat([0, 0], size, background_color);
     }
 }

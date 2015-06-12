@@ -94,6 +94,8 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
         &mut self,
         stream: &mut S, factory: &mut F)
     {
+        &self.dom.update_outdated();
+
         // Actually render the DOM
         render::render(
             &self.dom, &mut self.element_types,
