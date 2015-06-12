@@ -22,7 +22,7 @@ use gfx;
 use gfx::traits::*;
 use gfx_text;
 use element::{DomElement};
-use element_type::{ElementType};
+use element_type::{ElementType, ElementTypes};
 
 static FLAT_VERTEX_SRC: &'static [u8] = b"
     #version 150 core
@@ -249,7 +249,7 @@ impl<'a, R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>> RenderHelper<R> fo
 }
 
 pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
-    dom: &DomElement, element_types: &mut HashMap<String, Box<ElementType<R> + 'static>>,
+    dom: &DomElement, element_types: &mut ElementTypes<R>,
     stream: &mut S, factory: &mut F,
     render_cache: Rc<RefCell<RenderCache<R, F>>>)
 {
@@ -258,10 +258,12 @@ pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
 }
 
 fn render_element_recursive<R: gfx::Resources>(
-    element: &DomElement, element_types: &mut HashMap<String, Box<ElementType<R> + 'static>>,
+    element: &DomElement, element_types: &mut ElementTypes<R>,
     helper: &mut RenderHelper<R>)
 {
-    let tag = element.tag();
-    let element_type = element_types.get_mut(tag).unwrap();
+    // Look up the element's type
+    let element_type = element_types.get(element.tag());
+
+    // Actually render
     element_type.render(element, helper);
 }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::collections::{HashMap};
-use rustc_serialize::json;
 
 pub struct TemplateElement {
     tag: String,
@@ -79,43 +78,37 @@ impl DomElement {
     pub fn attr(&self, key: &str) -> Option<String> {
         self.template.attrs().get(key).map(|s| s.clone())
     }
+}
 
-    pub fn attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
-        let val_str = match self.attr(key) {
-            Some(s) => s,
-            None => return None
-        };
+mod domelement_attr_utils {
+    use rustc_serialize::json;
+        use super::{DomElement};
 
-        // TODO: Change this to use serde instead of rustc_serialize
-        match json::decode::<T>(&val_str) {
-            Ok(v) => Some(v),
-            Err(e) => None
+    impl DomElement {
+        pub fn attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
+            let val_str = match self.attr(key) {
+                Some(s) => s,
+                None => return None
+            };
+
+            // TODO: Change this to use serde instead of rustc_serialize
+            match json::decode::<T>(&val_str) {
+                Ok(v) => Some(v),
+                Err(e) => None
+            }
         }
-    }
 
-    pub fn size(&self) -> [f32; 2] {
-        let default = [100.0, 100.0];
+        /// Initializes the DomElement tree's bindings.
+        pub fn bindings_init(/* put scope table here */) {
+            unimplemented!();
+        }
 
-        let size = match self.attr_as::<Vec<f32>>("style_size") {
-            Some(s) => s,
-            None => return default
-        };
+        /// Updates the DomElement tree based on the values its elements are bound to.
+        pub fn bindings_update() {
+            // TODO: Actually update smartly instead of just wiping and re-creating everything
 
-        // Turn the vector into an array
-        if size.len() != 2 { return default; }
-        [*size.get(0).unwrap(), *size.get(1).unwrap()]
-    }
-
-    /// Initializes the DomElement tree's bindings.
-    pub fn bindings_init(/* put scope table here */) {
-        unimplemented!();
-    }
-
-    /// Updates the DomElement tree based on the values its elements are bound to.
-    pub fn bindings_update() {
-        // TODO: Actually update smartly instead of just wiping and re-creating everything
-
-        // TODO: Wipe and re-create here
+            // TODO: Wipe and re-create here
+        }
     }
 }
 
@@ -124,7 +117,7 @@ mod tests {
     use element::{TemplateElement};
 
     #[test]
-    fn domelement_get_attr_looks_up_value() {
+    fn domelement_attr_looks_up_value() {
         // Arrange
         let element = TemplateElement::new("test")
             .with_attr("foo", "bar")
@@ -139,29 +132,36 @@ mod tests {
     }
 
     #[test]
-    fn domelement_get_size_deserializes_value() {
+    fn domelement_attr_as_deserializes_value() {
         // Arrange
         let element = TemplateElement::new("test")
             .with_attr("style_size", "[500, 92]")
             .to_dom();
 
         // Act
-        let size = element.size();
+        let o_size = element.attr_as::<Vec<i32>>("style_size");
 
         // Assert
-        assert!(size[0] == 500.0);
-        assert!(size[1] == 92.0);
+        assert!(o_size.is_some());
+        let size = o_size.unwrap();
+        assert!(size.len() == 2);
+        assert!(size[0] == 500);
+        assert!(size[1] == 92);
     }
 
     #[test]
-    fn domelement_get_size_does_not_panic_on_lacking_data() {
+    fn domelement_attr_as_does_not_panic_on_invalid_or_lacking_data() {
         // Arrange
         let element = TemplateElement::new("test")
+            .with_attr("invalid", "akfiajc83C$)YN&#0")
             .to_dom();
 
         // Act
-        let _ = element.size();
+        let lac = element.attr_as::<Vec<i32>>("lacking");
+        let inv = element.attr_as::<Vec<i32>>("invalid");
 
-        // If we reached this we know it works
+        // Assert
+        assert!(lac.is_none());
+        assert!(inv.is_none());
     }
 }

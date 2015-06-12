@@ -41,11 +41,9 @@ pub mod element_type;
 mod render;
 
 use std::cell::RefCell;
-use std::collections::{HashMap};
 use std::rc::Rc;
-use gfx::traits::*;
 use element::{TemplateElement, DomElement};
-use element_type::{BlockType, ElementType};
+use element_type::{BlockType, ElementType, ElementTypes};
 
 pub enum Event {
     MouseMoved([i32; 2]),
@@ -57,25 +55,26 @@ pub enum Event {
 pub struct Gui<R: gfx::Resources, F: gfx::Factory<R>> {
     dom: DomElement,
     render_cache: Rc<RefCell<render::RenderCache<R, F>>>,
-    element_types: HashMap<String, Box<ElementType<R>>>
+    element_types: ElementTypes<R>
 }
 
 impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Initializes a new GUI with default values.
     pub fn new(factory: &mut F, template: TemplateElement) -> Gui<R, F> {
+        // Create a new element types lookup helper with BlockType as fallback
+        let element_types = ElementTypes::new(Box::new(BlockType));
+
         let mut gui = Gui {
             dom: template.to_dom(),
             render_cache: Rc::new(RefCell::new(render::RenderCache::new(factory))),
-            element_types: HashMap::new()
+            element_types: element_types
         };
-
-        gui.register_element_type("layout", Box::new(BlockType));
 
         gui
     }
 
     pub fn register_element_type(&mut self, tag: &str, element_type: Box<ElementType<R>>) {
-        self.element_types.insert(String::from(tag), element_type);
+        self.element_types.register(tag, element_type);
     }
 
     /// Raises an event in the GUI.

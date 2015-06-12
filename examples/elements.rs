@@ -34,6 +34,7 @@ fn main() {
 
     // Set up our Phosphorus UI
     let template = TemplateElement::new("layout")
+        .with_attr("style_size", "[600, 500]")
         .with_attr("style_background", "[21, 23, 24]")
         .with_child(TemplateElement::new("text").with_attr("value", "Hello world!"));
     let mut gui = phosphorus::Gui::new(&mut factory, template);
