@@ -52,16 +52,16 @@ pub struct BlockType;
 
 impl<R: gfx::Resources> ElementType<R> for BlockType {
     fn render(&mut self, element: &DomElement, helper: &mut RenderHelper<R>) {
-        let size = match element.attr_as::<Vec<i32>>("style_size") {
-            Some(c) => [c[0], c[1]],
-            None => [100, 100]
-        };
+        let size = element.attr_as::<Vec<i32>>("style_size")
+            .and_then(|v| if v.len() == 2 { Some(v) } else { None })
+            .map(|v| [v[0], v[1]])
+            .unwrap_or([100, 100]);
 
-        let background_color = match element.attr_as::<Vec<i32>>("style_background") {
-            Some(c) => [c[0] as f32 / 255.0, c[1] as f32 / 255.0, c[2] as f32 / 255.0],
-            None => [0.0, 0.0, 0.0]
-        };
-        
+        let background_color = element.attr_as::<Vec<i32>>("style_background")
+            .and_then(|v| if v.len() == 3 { Some(v) } else { None })
+            .map(|v| [v[0] as f32 / 255.0, v[1] as f32 / 255.0, v[2] as f32 / 255.0])
+            .unwrap_or([0.0, 0.0, 0.0]);
+
         helper.render_rect_flat([0, 0], size, background_color);
     }
 }
