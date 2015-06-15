@@ -41,6 +41,11 @@ impl ButtonBuilder {
         self
     }
 
+    pub fn with_size(mut self, size: [i32; 2]) -> ButtonBuilder {
+        self.size = size;
+        self
+    }
+
     // Requests a callback to be called on click.
     pub fn with_callback(mut self, callback: Box<Fn()>) -> ButtonBuilder {
         self.callback = Some(callback);

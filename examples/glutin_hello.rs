@@ -55,7 +55,7 @@ fn main() {
             .with_callback(Box::new(|| println!("Hello")))
             .build_boxed())
         .build();
-    let mut gui = phosphorus::Gui::new(&mut device, root, |d: &mut gfx_device_gl::Device| d.spawn_factory());
+    let mut gui = phosphorus::Gui::new(&mut device, &mut factory, root);
 
     // Run our actual UI loop
     'main: loop {

@@ -103,7 +103,7 @@ pub struct RenderOffset {
     pub position: [i32; 2]
 }
 
-pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
+pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R> + Clone> {
     draw_state: gfx::DrawState,
     sampler: gfx::device::handle::Sampler<R>,
 
@@ -113,11 +113,10 @@ pub struct RenderData<R: gfx::Resources, F: gfx::Factory<R>> {
     text_renderer: gfx_text::Renderer<R, F>
 }
 
-impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
-    pub fn new<D: gfx::Device, FactorySpawner>(device: &mut D, spawner: FactorySpawner) -> RenderData<R, F>
-        where FactorySpawner: Fn(&mut D) -> F
+impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> RenderData<R, F> {
+    pub fn new<D: gfx::Device>(device: &mut D, factory: &mut F) -> RenderData<R, F>
     {
-        let mut factory = spawner(device);
+        let mut factory = factory.clone();
 
         // Set up the stuff we'll need to render
         let flat_program = match factory.link_program(FLAT_VERTEX_SRC, FLAT_FRAGMENT_SRC) {
@@ -136,7 +135,7 @@ impl<R: gfx::Resources, F: gfx::Factory<R>> RenderData<R, F> {
                 gfx::tex::WrapMode::Clamp));
 
         // Set up our text renderer
-        let text_renderer = gfx_text::new(spawner(device))
+        let text_renderer = gfx_text::new(factory.clone())
             .with_size(13)
             .with_font_data(include_bytes!("../../assets/Roboto-Regular.ttf"))
             .build().unwrap();
@@ -159,7 +158,7 @@ pub trait Renderer<R: gfx::Resources> {
     fn render_text(&mut self, position: [i32; 2], text: &str);
 }
 
-pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: 'a + Stream<R>> {
+pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R> + Clone, S: 'a + Stream<R>> {
     render_data: Rc<RefCell<RenderData<R, F>>>,
     projection_matrix: [[f32; 4]; 4],
 
@@ -167,7 +166,7 @@ pub struct ConcreteRenderer<'a, R: gfx::Resources, F: 'a + gfx::Factory<R>, S: '
     stream: &'a mut S
 }
 
-impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
+impl<'a, R: gfx::Resources, F: gfx::Factory<R> + Clone, S: Stream<R>> ConcreteRenderer<'a, R, F, S> {
     pub fn new(
         factory: &'a mut F, stream: &'a mut S,
         render_data: Rc<RefCell<RenderData<R, F>>>, area: &RenderArea
@@ -188,7 +187,7 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> ConcreteRenderer<'
     }
 }
 
-impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for ConcreteRenderer<'a, R, F, S> {
+impl<'a, R: gfx::Resources, F: gfx::Factory<R> + Clone, S: Stream<R>> Renderer<R> for ConcreteRenderer<'a, R, F, S> {
     fn render_rect_flat(&mut self, position: [i32; 2], size: [i32; 2], color: [f32; 3]) {
         let render_data = &self.render_data.borrow();
 
@@ -248,11 +247,11 @@ impl<'a, R: gfx::Resources, F: gfx::Factory<R>, S: Stream<R>> Renderer<R> for Co
 
     fn render_text(&mut self, position: [i32; 2], text: &str) {
         let mut render_data = self.render_data.borrow_mut();
-        render_data.text_renderer.draw(
+        render_data.text_renderer.add(
             text,
             position,
             [1.0, 1.0, 1.0, 1.0],
         );
-        render_data.text_renderer.draw_end_at(self.stream, self.projection_matrix.clone()).unwrap();
+        render_data.text_renderer.draw_at(self.stream, self.projection_matrix.clone()).unwrap();
     }
 }
