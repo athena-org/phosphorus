@@ -14,7 +14,7 @@
 
 use std::collections::{HashMap};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TemplateElement {
     tag: String,
     attrs: HashMap<String, String>,
@@ -67,6 +67,7 @@ impl TemplateElement {
     }
 }
 
+#[derive(Debug)]
 pub struct DomElement {
     template: TemplateElement,
     children: Vec<DomElement>,
@@ -78,10 +79,15 @@ impl DomElement {
     pub fn update_outdated(&mut self) {
         if !self.is_outdated { return; }
 
+        // Clear any old lingering data
         self.children.clear();
 
+        // Update all children
         for child in self.template.children() {
-            self.children.push(child.clone().to_dom());
+            let mut child_dom = child.clone().to_dom();
+            child_dom.update_outdated();
+
+            self.children.push(child_dom);
         }
 
         self.is_outdated = false;
@@ -114,7 +120,7 @@ mod domelement_attr_utils {
             // TODO: Change this to use serde instead of rustc_serialize
             match json::decode::<T>(&val_str) {
                 Ok(v) => Some(v),
-                Err(e) => None
+                Err(_) => None
             }
         }
     }

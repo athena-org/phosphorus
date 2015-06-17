@@ -18,7 +18,7 @@ extern crate gfx;
 extern crate gfx_device_gl;
 extern crate gfx_window_glutin;
 
-use gfx::traits::*;
+use gfx::{Stream};
 use phosphorus::element::{TemplateElement};
 
 fn main() {
@@ -36,7 +36,21 @@ fn main() {
     let template = TemplateElement::new("layout")
         .with_attr("style_size", "[600, 500]")
         .with_attr("style_background", "[21, 23, 24]")
-        .with_child(TemplateElement::new("text").with_attr("value", "Hello world!"));
+        .with_child(TemplateElement::new("text")
+            .with_attr("value", "Hello world!")
+            .with_attr("style_size", "[80, 20]")
+        )
+        .with_child(TemplateElement::new("color_block")
+            .with_attr("style_background", "[200, 200, 0]")
+            .with_child(TemplateElement::new("color_block")
+                .with_attr("style_size", "[40, 20]")
+                .with_attr("style_background", "[0, 200, 200]")
+            )
+            .with_child(TemplateElement::new("color_block")
+                .with_attr("style_size", "[70, 20]")
+                .with_attr("style_background", "[200, 0, 200]")
+            )
+        );
     let mut gui = phosphorus::Gui::new(&mut factory, template);
 
     // Run our actual UI loop

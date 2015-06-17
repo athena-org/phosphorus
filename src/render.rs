@@ -14,7 +14,6 @@
 
 use std;
 use std::cell::RefCell;
-use std::collections::{HashMap};
 use std::rc::Rc;
 use cgmath;
 use cgmath::FixedArray;
@@ -254,23 +253,34 @@ pub fn render<R: gfx::Resources, S: Stream<R>, F: gfx::Factory<R>>(
     render_cache: Rc<RefCell<RenderCache<R, F>>>)
 {
     let mut helper = ConcreteRenderHelper::new(stream, factory, render_cache);
-    render_element_recursive(dom, element_types, &mut helper);
+    render_element_recursive(dom, [0, 0], element_types, &mut helper);
 }
 
 fn render_element_recursive<R: gfx::Resources>(
-    element: &DomElement, element_types: &mut ElementTypes<R>,
-    helper: &mut RenderHelper<R>)
+    element: &DomElement, position: [i32; 2],
+    element_types: &mut ElementTypes<R>, helper: &mut RenderHelper<R>)
 {
     {
         // Look up the element's type
         let element_type = element_types.get(element.tag());
 
         // Actually render
-        element_type.render(element, helper);
+        element_type.render(element, position, helper);
     }
 
     // Render all the element's children
+    let mut child_position = position;
     for child in element.children() {
-        render_element_recursive(child, element_types, helper);
+        // Render the child element
+        render_element_recursive(child, child_position, element_types, helper);
+
+        // Add the size to the position to offset future elements
+        let size = child.attr_as::<Vec<i32>>("style_size")
+            .and_then(|v| if v.len() == 2 { Some(v) } else { None })
+            .map(|v| [v[0], v[1]])
+            .unwrap_or([100, 100]);
+
+        // TODO: Make user select direction of move
+        child_position[1] += size[1];
     }
 }

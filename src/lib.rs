@@ -43,7 +43,7 @@ mod render;
 use std::cell::RefCell;
 use std::rc::Rc;
 use element::{TemplateElement, DomElement};
-use element_type::{BlockType, ElementType, ElementTypes};
+use element_type::{BlockType, TextType, ElementType, ElementTypes};
 
 pub enum Event {
     MouseMoved([i32; 2]),
@@ -62,9 +62,10 @@ impl<R: gfx::Resources, F: gfx::Factory<R> + Clone> Gui<R, F> {
     /// Initializes a new GUI with default values.
     pub fn new(factory: &mut F, template: TemplateElement) -> Gui<R, F> {
         // Create a new element types lookup helper with BlockType as fallback
-        let element_types = ElementTypes::new(Box::new(BlockType));
+        let mut element_types = ElementTypes::new(Box::new(BlockType));
+        element_types.register("text", Box::new(TextType));
 
-        let mut gui = Gui {
+        let gui = Gui {
             dom: template.to_dom(),
             render_cache: Rc::new(RefCell::new(render::RenderCache::new(factory))),
             element_types: element_types

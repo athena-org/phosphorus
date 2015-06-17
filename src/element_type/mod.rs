@@ -18,7 +18,7 @@ use element::{DomElement};
 use render::{RenderHelper};
 
 pub trait ElementType<R: gfx::Resources> {
-    fn render(&mut self, element: &DomElement, helper: &mut RenderHelper<R>);
+    fn render(&mut self, element: &DomElement, position: [i32; 2], helper: &mut RenderHelper<R>);
 }
 
 
@@ -51,7 +51,7 @@ impl<R: gfx::Resources> ElementTypes<R> {
 pub struct BlockType;
 
 impl<R: gfx::Resources> ElementType<R> for BlockType {
-    fn render(&mut self, element: &DomElement, helper: &mut RenderHelper<R>) {
+    fn render(&mut self, element: &DomElement, position: [i32; 2], helper: &mut RenderHelper<R>) {
         let size = element.attr_as::<Vec<i32>>("style_size")
             .and_then(|v| if v.len() == 2 { Some(v) } else { None })
             .map(|v| [v[0], v[1]])
@@ -62,6 +62,20 @@ impl<R: gfx::Resources> ElementType<R> for BlockType {
             .map(|v| [v[0] as f32 / 255.0, v[1] as f32 / 255.0, v[2] as f32 / 255.0])
             .unwrap_or([0.0, 0.0, 0.0]);
 
-        helper.render_rect_flat([0, 0], size, background_color);
+        helper.render_rect_flat(position, size, background_color);
+    }
+}
+
+pub struct TextType;
+
+impl<R: gfx::Resources> ElementType<R> for TextType {
+    fn render(&mut self, element: &DomElement, position: [i32; 2], helper: &mut RenderHelper<R>) {
+        // Render the base block type as background
+        BlockType.render(element, position, helper);
+
+        // If we have text, render it over it
+        if let Some(text) = element.attr("value") {
+            helper.render_text(position, &text);
+        }
     }
 }
