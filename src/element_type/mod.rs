@@ -57,12 +57,14 @@ impl<R: gfx::Resources> ElementType<R> for BlockType {
             .map(|v| [v[0], v[1]])
             .unwrap_or([100, 100]);
 
-        let background_color = element.attr_as::<Vec<i32>>("style_background")
+        let background_color_o = element.attr_as::<Vec<i32>>("style_background")
             .and_then(|v| if v.len() == 3 { Some(v) } else { None })
-            .map(|v| [v[0] as f32 / 255.0, v[1] as f32 / 255.0, v[2] as f32 / 255.0])
-            .unwrap_or([0.0, 0.0, 0.0]);
+            .map(|v| [v[0] as f32 / 255.0, v[1] as f32 / 255.0, v[2] as f32 / 255.0]);
 
-        helper.render_rect_flat(position, size, background_color);
+        // If we have a background color, render the background, if not just ignore it
+        if let Some(background_color) = background_color_o {
+            helper.render_rect_flat(position, size, background_color);
+        }
     }
 }
 

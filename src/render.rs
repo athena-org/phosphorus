@@ -268,6 +268,12 @@ fn render_element_recursive<R: gfx::Resources>(
         element_type.render(element, position, helper);
     }
 
+    // Check what direction we need to move the layout in
+    let direction = {
+        let dir = element.attr("style_layout_direction").unwrap_or(String::from(""));
+        if dir == "horizontal" { 0 } else { 1 }
+    };
+
     // Render all the element's children
     let mut child_position = position;
     for child in element.children() {
@@ -280,7 +286,6 @@ fn render_element_recursive<R: gfx::Resources>(
             .map(|v| [v[0], v[1]])
             .unwrap_or([100, 100]);
 
-        // TODO: Make user select direction of move
-        child_position[1] += size[1];
+        child_position[direction] += size[direction];
     }
 }
