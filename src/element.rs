@@ -107,18 +107,17 @@ impl DomElement {
 }
 
 mod domelement_attr_utils {
-    use rustc_serialize::json;
-        use super::{DomElement};
+    use serde::{json, Deserialize};
+    use super::{DomElement};
 
     impl DomElement {
-        pub fn attr_as<T: ::rustc_serialize::Decodable>(&self, key: &str) -> Option<T> {
+        pub fn attr_as<T: Deserialize>(&self, key: &str) -> Option<T> {
             let val_str = match self.attr(key) {
                 Some(s) => s,
                 None => return None
             };
 
-            // TODO: Change this to use serde instead of rustc_serialize
-            match json::decode::<T>(&val_str) {
+            match json::from_str::<T>(&val_str) {
                 Ok(v) => Some(v),
                 Err(_) => None
             }

@@ -34,7 +34,7 @@ extern crate cgmath;
 extern crate gfx;
 extern crate gfx_text;
 extern crate gfx_texture;
-extern crate rustc_serialize;
+extern crate serde;
 
 pub mod element;
 pub mod element_type;
