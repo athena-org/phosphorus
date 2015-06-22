@@ -26,7 +26,7 @@ fn main() {
     let (mut stream, mut device, mut factory) = {
         let window = glutin::WindowBuilder::new()
             .with_vsync()
-            .with_dimensions(600, 500)
+            .with_dimensions(640, 480)
             .with_title(String::from("Phosphorus Widgets"))
             .build_strict().unwrap();
         gfx_window_glutin::init(window)
@@ -34,7 +34,7 @@ fn main() {
 
     // Set up our Phosphorus UI
     let template = TemplateElement::new("layout")
-        .with_attr("style_size", "[600, 500]")
+        .with_attr("style_size", "[640, 480]")
         .with_attr("style_background", "[21, 23, 24]")
         // Start text
         .with_child(TemplateElement::new("text")
